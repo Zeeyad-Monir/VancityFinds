@@ -61,6 +61,37 @@ h2 {
   margin-bottom: var(--spacing-md);
 }
 
+/* Constant Underline Animation for Trending Spots and Categories Titles */
+.trending-spots h2,
+.categories h2 {
+  position: relative;
+  padding-bottom: 10px;
+}
+
+.trending-spots h2::after,
+.categories h2::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  height: 3px;
+  width: 130px;
+  background: linear-gradient(90deg, var(--secondary-color), var(--primary-color), var(--secondary-color));
+  background-size: 200% auto;
+  animation: gradientAnimation 3s linear infinite;
+  border-radius: 2px;
+  transform: translateX(-50%);
+}
+
+@keyframes gradientAnimation {
+  0% {
+    background-position: 0% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
 p {
   margin-bottom: var(--spacing-sm);
 }
@@ -139,7 +170,7 @@ header.scrolled {
   margin: 0 auto;
 }
 
-/* Logo styling */
+/* Logo styling with animating green underline */
 .logo {
   font-family: var(--heading-font);
   font-size: 1.8rem;
@@ -153,19 +184,19 @@ header.scrolled {
 .logo::after {
   content: '';
   position: absolute;
-  bottom: -4px;
   left: 0;
-  width: 30px;
+  bottom: -5px;
+  width: 0;
   height: 3px;
   background-color: var(--secondary-color);
-  transition: width 0.3s ease;
+  transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .logo:hover::after {
   width: 100%;
 }
 
-/* Navigation menu styling */
+/* Navigation menu styling with animating green underline */
 .nav-menu {
   display: flex;
   list-style: none;
@@ -192,17 +223,20 @@ header.scrolled {
   position: relative;
 }
 
+.nav-menu a:not(.btn) {
+  position: relative;
+}
+
 .nav-menu a:not(.btn)::after {
   content: '';
   position: absolute;
+  left: 50%;
+  bottom: -5px;
+  height: 3px;
   width: 0;
-  height: 2px;
-  bottom: 0;
-  left: 0;
   background-color: var(--secondary-color);
-  transition: width 0.3s ease;
-  opacity: 0;
-  transform: translateY(5px);
+  transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  transform: translateX(-50%);
 }
 
 .nav-menu a:not(.btn):hover {
@@ -211,8 +245,6 @@ header.scrolled {
 
 .nav-menu a:not(.btn):hover::after {
   width: 100%;
-  opacity: 1;
-  transform: translateY(0);
 }
 
 /* Sign In button styling */
@@ -487,7 +519,7 @@ header.scrolled {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: var(--spacing-md);
-  max-width: 800px;
+  max-width: 1000px;
   margin: 0 auto;
 }
 
