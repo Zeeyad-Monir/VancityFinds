@@ -41,7 +41,7 @@ body {
   font-family: var(--body-font);
   color: var(--dark-color);
   line-height: 1.6;
-  background-color: var(--light-color);
+  background-color: white;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -99,14 +99,17 @@ button:hover, .btn:hover {
 }
 
 .container {
-  width: 100%;
+  width: 90%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 var(--spacing-sm);
+  padding: 0 var(--spacing-md);
 }
 
+/* Enhanced Section Spacing */
 section {
-  padding: var(--spacing-lg) 0;
+  padding: calc(var(--spacing-lg) * 1.5) 0; /* Increased from var(--spacing-lg) */
+  margin: 0; /* Remove margins between sections */
+  background-color: white; /* Ensure all sections have white background */
 }
 
 /* Updated Header Styles */
@@ -314,6 +317,7 @@ header.scrolled {
   justify-content: center;
   text-align: center;
   margin-top: 60px; 
+  margin-bottom: 0; /* Removed extra space after hero section */
   overflow: hidden;
 }
 
@@ -364,7 +368,9 @@ header.scrolled {
 /* Trending Spots Section Styles */
 .trending-spots {
   background-color: white;
-  padding-bottom: var(--spacing-lg);
+  padding-top: calc(var(--spacing-lg) * 1.5);
+  padding-bottom: calc(var(--spacing-lg) * 1.5);
+  margin-top: 0;
 }
 
 .carousel-container {
@@ -442,7 +448,7 @@ header.scrolled {
 }
 
 .spot-content {
-  padding: var(--spacing-sm);
+  padding: calc(var(--spacing-sm) * 1.2);
 }
 
 .spot-category {
@@ -469,15 +475,20 @@ header.scrolled {
   overflow: hidden;
 }
 
-/* Categories Section Styles */
+/* Categories Section Styles - Updated */
 .categories {
   background-color: #f8f9fa;
+  padding-top: calc(var(--spacing-lg) * 1.5);
+  padding-bottom: calc(var(--spacing-lg) * 1.5);
+  margin-top: 2rem;
 }
 
 .categories-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: var(--spacing-md);
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 .category-card {
@@ -501,7 +512,7 @@ header.scrolled {
 }
 
 .category-name {
-  padding: var(--spacing-sm);
+  padding: calc(var(--spacing-sm) * 1.2);
   font-weight: 600;
 }
 
@@ -509,7 +520,8 @@ header.scrolled {
 footer {
   background-color: var(--primary-color);
   color: white;
-  padding: var(--spacing-md) 0;
+  margin-top: 2rem;
+  padding: calc(var(--spacing-md) * 1.5) 0;
 }
 
 .footer-content {
@@ -665,6 +677,11 @@ footer {
   .hero h1 {
     font-size: 2.5rem;
   }
+  
+  .categories-grid {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 500px;
+  }
 }
 
 @media screen and (max-width: 576px) {
@@ -680,8 +697,13 @@ footer {
     width: 100%;
   }
   
-  .spots-grid, .categories-grid {
+  .spots-grid {
     grid-template-columns: 1fr;
+  }
+  
+  .categories-grid {
+    grid-template-columns: 1fr;
+    max-width: 300px;
   }
   
   .hero h1 {
