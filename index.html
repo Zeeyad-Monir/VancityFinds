@@ -12,7 +12,7 @@
     <!-- Header -->
     <header>
         <div class="container header-container">
-            <a href="#" class="logo">Vancity Finds</a>
+            <a href="#home" class="logo">Vancity Finds</a>
             
             <div class="hamburger">
                 <div></div>
@@ -21,10 +21,9 @@
             </div>
             
             <ul class="nav-menu">
-                <li><a href="#">Home</a></li>
-                <li><a href="#">Browse Spots</a></li>
-                <li><a href="#">About</a></li>
-                <li><a href="#">Contact</a></li>
+                <li><a href="#home">Home</a></li>
+                <li><a href="#categories">Browse Spots</a></li>
+                <li><a href="#footer">Contact</a></li>
                 <li><a href="#" class="btn">Sign In</a></li>
             </ul>
             
@@ -36,7 +35,7 @@
     </header>
     
 <!-- Hero Section -->
-<section class="hero">
+<section class="hero" id="home">
   <div class="hero-background"></div>
   <!-- Removed the .hero-overlay div -->
   <div class="hero-white-layer"></div>
@@ -62,7 +61,7 @@
     </section>
     
     <!-- Categories Section -->
-    <section class="categories">
+    <section class="categories" id="categories">
         <div class="container">
             <h2>Browse by Category</h2>
             <div class="categories-grid" id="categories-container">
@@ -72,15 +71,15 @@
     </section>
     
     <!-- Footer -->
-    <footer>
+    <footer id="footer">
         <div class="container">
             <div class="footer-content">
-                <ul class="footer-links">
-                    <li><a href="#">About Us</a></li>
-                    <li><a href="#">Contact</a></li>
-                    <li><a href="#">Privacy Policy</a></li>
-                    <li><a href="#">Terms of Service</a></li>
-                </ul>
+                <div class="contact-info">
+                    <h3>Contact Us</h3>
+                    <p>Email: info@vancityfinds.com</p>
+                    <p>Phone: (604) 555-1234</p>
+                    <p>123 Vancouver Street, Vancouver, BC</p>
+                </div>
                 
                 <div class="social-icons">
                     <a href="#">FB</a>

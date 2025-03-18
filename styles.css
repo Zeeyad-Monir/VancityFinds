@@ -169,19 +169,19 @@ header.scrolled {
   margin: 0;
   padding: 0;
   align-items: center;
-  gap: 1.8rem;
+  gap: 5.0rem;
 }
 
 .nav-menu li {
   margin: 0;
-  padding: 0;
+  padding: 0px;
   position: relative;
 }
 
 .nav-menu a {
   color: var(--dark-color);
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 1.0rem;
   letter-spacing: 0.5px;
   text-transform: uppercase;
   padding: 0.5rem 0;
@@ -518,17 +518,18 @@ footer {
   flex-wrap: wrap;
 }
 
-.footer-links {
-  display: flex;
-  list-style: none;
-}
-
-.footer-links li {
-  margin-right: var(--spacing-md);
-}
-
-.footer-links a {
+.contact-info {
   color: white;
+}
+
+.contact-info h3 {
+  margin-bottom: var(--spacing-xs);
+  font-size: 1.2rem;
+}
+
+.contact-info p {
+  margin-bottom: var(--spacing-xs);
+  font-size: 0.9rem;
 }
 
 .social-icons {
@@ -656,7 +657,7 @@ footer {
     text-align: center;
   }
   
-  .footer-links, .social-icons {
+  .contact-info, .social-icons {
     justify-content: center;
     margin-bottom: var(--spacing-sm);
   }
