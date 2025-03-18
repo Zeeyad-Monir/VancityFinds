@@ -308,48 +308,57 @@ header.scrolled {
 /* Hero Section Styles */
 .hero {
   height: 100vh;
-  background-image: url('/api/placeholder/1200/800');
-  background-size: cover;
-  background-position: center;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  color: white;
-  margin-top: 60px; /* Account for fixed header */
+  margin-top: 60px; 
+  overflow: hidden;
 }
 
-.hero::before {
-  content: '';
+.hero-background {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: var(--overlay-color);
+  background-image: url('photos/vancouverReal.jpeg');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.7;
+  filter: brightness(80%); 
+}
+
+.hero-white-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* Increase from 0.05 to ~0.15 or 0.2 */
+  background-color: rgba(255, 255, 255, 0.15);
 }
 
 .hero-content {
   position: relative;
-  z-index: 1;
-  max-width: 800px;
-  padding: var(--spacing-md);
+  z-index: 2;
+  /* Keep the text white for a clean look */
+  color: #fff;
+  /* Add a text shadow to help text stand out */
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+  max-width: 700px; 
+  padding: 0 1rem;   
 }
 
-.hero h1 {
-  font-size: 3.5rem;
-  margin-bottom: var(--spacing-md);
+.hero-content h1 {
+  font-size: 2.5rem;  
+  margin-bottom: 1rem;
 }
 
-.hero p {
-  font-size: 1.2rem;
-  margin-bottom: var(--spacing-md);
-}
-
-.cta-button {
-  padding: var(--spacing-sm) var(--spacing-lg);
-  font-size: 1.1rem;
+.hero-content p {
+  font-size: 1.1rem;  
+  margin-bottom: 1.5rem;
 }
 
 /* Trending Spots Section Styles */
@@ -367,14 +376,14 @@ header.scrolled {
   display: flex;
   overflow-x: auto;
   scroll-behavior: smooth;
-  scrollbar-width: none; /* Hide scrollbar for Firefox */
-  -ms-overflow-style: none; /* Hide scrollbar for IE and Edge */
+  scrollbar-width: none; 
+  -ms-overflow-style: none; 
   gap: var(--spacing-md);
   padding: var(--spacing-sm) 0;
 }
 
 .spots-carousel::-webkit-scrollbar {
-  display: none; /* Hide scrollbar for Chrome, Safari and Opera */
+  display: none; 
 }
 
 /* Updated carousel button styles */
@@ -382,34 +391,34 @@ header.scrolled {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 48px; /* Increased size */
-  height: 48px; /* Perfect circle */
+  width: 48px; 
+  height: 48px; 
   border-radius: 50%;
   background-color: var(--primary-color);
   color: white;
   border: none;
   font-size: 1.2rem;
-  font-weight: bold; /* Make text more visible */
+  font-weight: bold; 
   cursor: pointer;
   z-index: 10;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Enhanced shadow */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); 
   transition: background-color var(--transition-speed), transform var(--transition-speed);
 }
 
 .carousel-button:hover {
   background-color: var(--secondary-color);
-  transform: translateY(-50%) scale(1.1); /* Slight scale effect on hover */
+  transform: translateY(-50%) scale(1.1); 
 }
 
 .prev-button {
-  left: -24px; /* Move outside of the container */
+  left: -24px; 
 }
 
 .next-button {
-  right: -24px; /* Move outside of the container */
+  right: -24px;
 }
 
 .spot-card {
@@ -418,7 +427,7 @@ header.scrolled {
   overflow: hidden;
   box-shadow: var(--box-shadow);
   transition: transform var(--transition-speed), box-shadow var(--transition-speed);
-  flex: 0 0 300px; /* Fixed width for carousel items */
+  flex: 0 0 300px; 
 }
 
 .spot-card:hover {
