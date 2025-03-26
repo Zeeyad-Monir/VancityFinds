@@ -1,13 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Discover Vancouver's best restaurants and eateries with Vancity Finds.">
-    <meta name="keywords" content="Vancouver, restaurants, dining, Japanese food, Mexican food, Italian food, local eats">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+        name="description"
+        content="Discover Vancouver's best restaurants and eateries with Vancity Finds."
+    />
+    <meta
+        name="keywords"
+        content="Vancouver, restaurants, dining, Japanese food, Mexican food, Italian food, local eats"
+    />
     <title>Vancity Finds - Restaurants</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="restaurants.css">
+
+    <!-- Existing styles -->
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="restaurants.css" />
+
+    <!-- Lottie Web Component (needed to use <lottie-player>) -->
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
 </head>
 <body>
     <!-- Header -->
@@ -29,7 +40,7 @@
             </ul>
             
             <div class="search-bar">
-                <input type="text" placeholder="Search restaurants...">
+                <input type="text" placeholder="Search restaurants..." />
                 <button>Search</button>
             </div>
         </div>
@@ -41,16 +52,38 @@
         <div class="hero-white-layer"></div>
         <div class="hero-content">
             <h1>Vancouver's Finest Restaurants</h1>
-            <p>From authentic sushi to classic Italian, discover the best culinary experiences Vancouver has to offer.</p>
+            <p>
+                From authentic sushi to classic Italian, discover the best culinary
+                experiences Vancouver has to offer.
+            </p>
             <a href="#japanese" class="btn cta-button">Explore Restaurants</a>
         </div>
     </section>
     
-    <!-- Japanese Cuisine Section -->
-    <section class="cuisine-section" id="japanese">
+    <!-- Japanese Cuisine Section with Lottie background -->
+    <section class="cuisine-section lottie-section" id="japanese">
+        <!-- Lottie container for background animation -->
+        <div class="lottie-background">
+            <!-- 
+                lottie player, adjust settings here
+            -->
+            <lottie-player
+      src="/json/japanThree.json"
+      background="transparent"
+      speed="0.3"
+      preserveAspectRatio="none"
+      style="width: 100%; height: 140%; opacity: 0.070;"
+      loop
+      autoplay
+    ></lottie-player>
+        </div>
+
         <div class="container">
             <h2 class="cuisine-title">Japanese Cuisine</h2>
-            <p class="cuisine-description">Vancouver is renowned for its exceptional Japanese restaurants, offering everything from traditional sushi to modern fusion creations.</p>
+            <p class="cuisine-description">
+                Vancouver is renowned for its exceptional Japanese restaurants, offering
+                everything from traditional sushi to modern fusion creations.
+            </p>
             
             <div class="carousel-container">
                 <button class="carousel-button prev-button" id="japanese-prev">&lt;</button>
@@ -66,7 +99,10 @@
     <section class="cuisine-section" id="mexican">
         <div class="container">
             <h2 class="cuisine-title">Mexican Cuisine</h2>
-            <p class="cuisine-description">Enjoy authentic tacos, fresh guacamole, and spicy salsas at Vancouver's vibrant Mexican eateries.</p>
+            <p class="cuisine-description">
+                Enjoy authentic tacos, fresh guacamole, and spicy salsas at Vancouver's
+                vibrant Mexican eateries.
+            </p>
             
             <div class="carousel-container">
                 <button class="carousel-button prev-button" id="mexican-prev">&lt;</button>
@@ -82,7 +118,10 @@
     <section class="cuisine-section" id="italian">
         <div class="container">
             <h2 class="cuisine-title">Italian Cuisine</h2>
-            <p class="cuisine-description">Savor handmade pasta, wood-fired pizzas, and decadent desserts at these local Italian favorites.</p>
+            <p class="cuisine-description">
+                Savor handmade pasta, wood-fired pizzas, and decadent desserts at these
+                local Italian favorites.
+            </p>
             
             <div class="carousel-container">
                 <button class="carousel-button prev-button" id="italian-prev">&lt;</button>
