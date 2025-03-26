@@ -64,8 +64,39 @@
     <section class="categories" id="categories">
         <div class="container">
             <h2>Browse by Category</h2>
-            <div class="categories-grid" id="categories-container">
-                <!-- Categories will be dynamically generated here -->
+            <div class="categories-grid">
+                <!-- Categories with direct HTML instead of JS generation -->
+                <div class="category-card">
+                    <div class="category-icon" style="background-image: url('/api/placeholder/300/200')"></div>
+                    <div class="category-name">Cafés & Coffee Shops</div>
+                </div>
+                
+                <a href="restaurants.html" style="text-decoration: none; color: inherit;">
+                    <div class="category-card">
+                        <div class="category-icon" style="background-image: url('/api/placeholder/300/200')"></div>
+                        <div class="category-name">Restaurants & Dining</div>
+                    </div>
+                </a>
+                
+                <div class="category-card">
+                    <div class="category-icon" style="background-image: url('/api/placeholder/300/200')"></div>
+                    <div class="category-name">Outdoor Activities</div>
+                </div>
+                
+                <div class="category-card">
+                    <div class="category-icon" style="background-image: url('/api/placeholder/300/200')"></div>
+                    <div class="category-name">Arts & Culture</div>
+                </div>
+                
+                <div class="category-card">
+                    <div class="category-icon" style="background-image: url('/api/placeholder/300/200')"></div>
+                    <div class="category-name">Shopping & Markets</div>
+                </div>
+                
+                <div class="category-card">
+                    <div class="category-icon" style="background-image: url('/api/placeholder/300/200')"></div>
+                    <div class="category-name">Nightlife</div>
+                </div>
             </div>
         </div>
     </section>
@@ -95,5 +126,12 @@
     </footer>
 
     <script src="script.js"></script>
+    <script>
+        // Override the populateCategories function to do nothing
+        function populateCategories() {
+            // Function overridden to do nothing since categories are in HTML now
+            return;
+        }
+    </script>
 </body>
 </html>

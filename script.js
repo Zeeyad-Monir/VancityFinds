@@ -115,6 +115,8 @@ function populateCategories() {
   });
 }
 
+
+
 // Enhanced mobile navigation setup
 function setupMobileNav() {
   const header = document.querySelector('header');
