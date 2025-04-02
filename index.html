@@ -1,137 +1,168 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Discover Vancouver's hidden gems and local favorites with Vancity Finds.">
-    <meta name="keywords" content="Vancouver, local spots, hidden gems, cafes, restaurants, outdoor activities">
-    <title>Vancity Finds</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Discover Vancouver's hidden gems and local favorites with Vancity Finds.">
+  <meta name="keywords" content="Vancouver, local spots, hidden gems, cafes, restaurants, outdoor activities">
+  <title>Vancity Finds</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Header -->
-    <header>
-        <div class="container header-container">
-            <a href="#home" class="logo">Vancity Finds</a>
-            
-            <div class="hamburger">
-                <div></div>
-                <div></div>
-                <div></div>
-            </div>
-            
-            <ul class="nav-menu">
-                <li><a href="#home">Home</a></li>
-                <li><a href="#categories">Browse Spots</a></li>
-                <li><a href="#footer">Contact</a></li>
-                <li><a href="#" class="btn">Sign In</a></li>
-            </ul>
-            
-            <div class="search-bar">
-                <input type="text" placeholder="Search...">
-                <button>Search</button>
-            </div>
-        </div>
-    </header>
-    
-<!-- Hero Section -->
-<section class="hero" id="home">
-  <div class="hero-background"></div>
-  <!-- Removed the .hero-overlay div -->
-  <div class="hero-white-layer"></div>
-  <div class="hero-content">
-      <h1>Discover Vancouver's Hidden Gems</h1>
-      <p>Explore unique local spots curated by Vancouverites who know the city best.</p>
-      <a href="#trending" class="btn cta-button">Explore Spots</a>
-  </div>
-</section>
-    
-    <!-- Trending Spots Section -->
-    <section class="trending-spots" id="trending">
-        <div class="container">
-            <h2>Trending Spots</h2>
-            <div class="carousel-container">
-                <button class="carousel-button prev-button">&lt;</button>
-                <div class="spots-carousel" id="spots-container">
-                    <!-- Spots will be dynamically generated here -->
-                </div>
-                <button class="carousel-button next-button">&gt;</button>
-            </div>
-        </div>
-    </section>
-    
-    <!-- Categories Section -->
-    <section class="categories" id="categories">
-        <div class="container">
-            <h2>Browse by Category</h2>
-            <div class="categories-grid">
-                <!-- Categories with direct HTML instead of JS generation -->
-                <div class="category-card">
-                    <div class="category-icon" style="background-image: url('/api/placeholder/300/200')"></div>
-                    <div class="category-name">Cafés & Coffee Shops</div>
-                </div>
-                
-                <a href="restaurants.html" style="text-decoration: none; color: inherit;">
-                    <div class="category-card">
-                        <div class="category-icon" style="background-image: url('/api/placeholder/300/200')"></div>
-                        <div class="category-name">Restaurants & Dining</div>
-                    </div>
-                </a>
-                
-                <div class="category-card">
-                    <div class="category-icon" style="background-image: url('/api/placeholder/300/200')"></div>
-                    <div class="category-name">Outdoor Activities</div>
-                </div>
-                
-                <div class="category-card">
-                    <div class="category-icon" style="background-image: url('/api/placeholder/300/200')"></div>
-                    <div class="category-name">Arts & Culture</div>
-                </div>
-                
-                <div class="category-card">
-                    <div class="category-icon" style="background-image: url('/api/placeholder/300/200')"></div>
-                    <div class="category-name">Shopping & Markets</div>
-                </div>
-                
-                <div class="category-card">
-                    <div class="category-icon" style="background-image: url('/api/placeholder/300/200')"></div>
-                    <div class="category-name">Nightlife</div>
-                </div>
-            </div>
-        </div>
-    </section>
-    
-    <!-- Footer -->
-    <footer id="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="contact-info">
-                    <h3>Contact Us</h3>
-                    <p>Email: info@vancityfinds.com</p>
-                    <p>Phone: (604) 555-1234</p>
-                    <p>123 Vancouver Street, Vancouver, BC</p>
-                </div>
-                
-                <div class="social-icons">
-                    <a href="#">FB</a>
-                    <a href="#">IG</a>
-                    <a href="#">TW</a>
-                </div>
-            </div>
-            
-            <div class="copyright">
-                <p>&copy; 2025 Vancity Finds. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
+  <!-- Header -->
+  <header>
+      <div class="container header-container">
+          <a href="#home" class="logo">Vancity Finds</a>
+          
+          <div class="hamburger">
+              <div></div>
+              <div></div>
+              <div></div>
+          </div>
+          
+          <ul class="nav-menu">
+              <li><a href="#home">Home</a></li>
+              <li><a href="#categories">Browse Spots</a></li>
+              <li><a href="#footer">Contact</a></li>
+              <!-- Updated button with an ID for authentication -->
+              <li><a href="auth.html" class="btn">Sign Up</a></li>
 
-    <script src="script.js"></script>
-    <script>
-        // Override the populateCategories function to do nothing
-        function populateCategories() {
-            // Function overridden to do nothing since categories are in HTML now
-            return;
-        }
-    </script>
+          </ul>
+          
+          <div class="search-bar">
+              <input type="text" placeholder="Search...">
+              <button>Search</button>
+          </div>
+      </div>
+  </header>
+  
+  <!-- Hero Section -->
+  <section class="hero" id="home">
+    <div class="hero-background"></div>
+    <div class="hero-white-layer"></div>
+    <div class="hero-content">
+        <h1>Discover Vancouver's Hidden Gems</h1>
+        <p>Explore unique local spots curated by Vancouverites who know the city best.</p>
+        <a href="#trending" class="btn cta-button">Explore Spots</a>
+    </div>
+  </section>
+      
+  <!-- Trending Spots Section -->
+  <section class="trending-spots" id="trending">
+      <div class="container">
+          <h2>Trending Spots</h2>
+          <div class="carousel-container">
+              <button class="carousel-button prev-button">&lt;</button>
+              <div class="spots-carousel" id="spots-container">
+                  <!-- Spots will be dynamically generated here -->
+              </div>
+              <button class="carousel-button next-button">&gt;</button>
+          </div>
+      </div>
+  </section>
+      
+  <!-- Categories Section -->
+  <section class="categories" id="categories">
+      <div class="container">
+          <h2>Browse by Category</h2>
+          <div class="categories-grid">
+              <!-- Categories in HTML -->
+              <div class="category-card">
+                  <div class="category-icon" style="background-image: url('/api/placeholder/300/200')"></div>
+                  <div class="category-name">Cafés & Coffee Shops</div>
+              </div>
+              
+              <a href="restaurants.html" style="text-decoration: none; color: inherit;">
+                  <div class="category-card">
+                      <div class="category-icon" style="background-image: url('/api/placeholder/300/200')"></div>
+                      <div class="category-name">Restaurants & Dining</div>
+                  </div>
+              </a>
+              
+              <div class="category-card">
+                  <div class="category-icon" style="background-image: url('/api/placeholder/300/200')"></div>
+                  <div class="category-name">Outdoor Activities</div>
+              </div>
+              
+              <div class="category-card">
+                  <div class="category-icon" style="background-image: url('/api/placeholder/300/200')"></div>
+                  <div class="category-name">Arts & Culture</div>
+              </div>
+              
+              <div class="category-card">
+                  <div class="category-icon" style="background-image: url('/api/placeholder/300/200')"></div>
+                  <div class="category-name">Shopping & Markets</div>
+              </div>
+              
+              <div class="category-card">
+                  <div class="category-icon" style="background-image: url('/api/placeholder/300/200')"></div>
+                  <div class="category-name">Nightlife</div>
+              </div>
+          </div>
+      </div>
+  </section>
+      
+  <!-- Footer -->
+  <footer id="footer">
+      <div class="container">
+          <div class="footer-content">
+              <div class="contact-info">
+                  <h3>Contact Us</h3>
+                  <p>Email: info@vancityfinds.com</p>
+                  <p>Phone: (604) 555-1234</p>
+                  <p>123 Vancouver Street, Vancouver, BC</p>
+              </div>
+              
+              <div class="social-icons">
+                  <a href="#">FB</a>
+                  <a href="#">IG</a>
+                  <a href="#">TW</a>
+              </div>
+          </div>
+          
+          <div class="copyright">
+              <p>&copy; 2025 Vancity Finds. All rights reserved.</p>
+          </div>
+      </div>
+  </footer>
+  
+  <!-- Firebase SDK & Config -->
+  <script type="module">
+    // Import Firebase modules
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-analytics.js";
+    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+
+    // Your Firebase configuration object
+    const firebaseConfig = {
+  apiKey: "AIzaSyDItRW84PjUVkhrrKZwJS8fZJg6NwG_nXc",
+  authDomain: "vanfinds-24006.firebaseapp.com",
+  projectId: "vanfinds-24006",
+  storageBucket: "vanfinds-24006.appspot.com", 
+  messagingSenderId: "946012957250",
+  appId: "1:946012957250:web:366f574d63b3bdd31cdbdb",
+  measurementId: "G-XQ3MD366CB"
+};
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const auth = getAuth(app);
+
+    // Expose Firebase Auth functions globally for script.js to use
+    window.firebaseAuth = auth;
+    window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+    window.signOut = signOut;
+    window.onAuthStateChanged = onAuthStateChanged;
+  </script>
+  
+  <!-- Main JavaScript file -->
+  <script src="script.js"></script>
+  <script>
+    // Override the populateCategories function if needed
+    function populateCategories() {
+      return;
+    }
+  </script>
 </body>
 </html>
