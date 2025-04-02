@@ -82,17 +82,19 @@
                   <div class="category-name">Cafés & Coffee Shops</div>
               </div>
               
-              <a href="restaurants.html" style="text-decoration: none; color: inherit;">
+              <a href="restaurants.php" style="text-decoration: none; color: inherit;">
                   <div class="category-card">
                       <div class="category-icon" style="background-image: url('/api/placeholder/300/200')"></div>
                       <div class="category-name">Restaurants & Dining</div>
                   </div>
               </a>
-              
-              <div class="category-card">
-                  <div class="category-icon" style="background-image: url('/api/placeholder/300/200')"></div>
-                  <div class="category-name">Outdoor Activities</div>
-              </div>
+
+                <a href="restaurants.php" style="text-decoration: none; color: inherit;">
+                    <div class="category-card">
+                        <div class="category-icon" style="background-image: url('/api/placeholder/300/200')"></div>
+                        <div class="category-name">Parks</div>
+                    </div>
+                </a>
               
               <div class="category-card">
                   <div class="category-icon" style="background-image: url('/api/placeholder/300/200')"></div>
