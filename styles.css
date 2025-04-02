@@ -548,6 +548,197 @@ header.scrolled {
   font-weight: 600;
 }
 
+/* Parks Section Styling */
+/* Filter Section Styling */
+.filters-section {
+  background-color: #f7fafc;
+  padding: var(--spacing-lg) 0;
+  margin-bottom: var(--spacing-lg); /* Space between the filter and grid */
+}
+
+.filters-section .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+}
+
+.filter-group {
+  flex: 1;
+  min-width: 200px;  /* Ensure minimum width for filters */
+  margin-bottom: var(--spacing-sm);
+}
+
+.filter-group label {
+  display: block;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--dark-color);
+  margin-bottom: 0.5rem;
+}
+
+.filter-group select {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius);
+  border: 1px solid #e2e8f0;
+  font-size: 1rem;
+  color: var(--dark-color);
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: border 0.3s ease;
+}
+
+.filter-group select:focus {
+  border-color: var(--primary-color);
+  outline: none;
+}
+
+button[type="submit"] {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  margin-top: var(--spacing-sm);
+}
+
+button[type="submit"]:hover {
+  background-color: var(--secondary-color);
+  transform: translateY(-2px);
+}
+
+/* Parks Grid Section Styling */
+/* Filter Section Styling */
+.filters-section {
+  background-color: #f7fafc;
+  padding: var(--spacing-lg) 0;
+  margin-top: calc(var(--spacing-lg) + 60px);  /* Ensure it is not covered by the navbar */
+  margin-bottom: var(--spacing-lg); /* Space between the filter and grid */
+}
+
+.filters-section .container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  width: 100%;
+}
+
+.filter-group {
+  flex: 1;
+  min-width: 200px;
+  max-width: 300px;  /* Limit maximum width to prevent excessive stretching */
+  margin-bottom: var(--spacing-sm);
+}
+
+.filter-group label {
+  display: block;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--dark-color);
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.filter-group select {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius);
+  border: 1px solid #e2e8f0;
+  font-size: 1rem;
+  color: var(--dark-color);
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: border 0.3s ease;
+}
+
+.filter-group select:focus {
+  border-color: var(--primary-color);
+  outline: none;
+}
+
+button[type="submit"] {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  margin-top: var(--spacing-sm);
+}
+
+button[type="submit"]:hover {
+  background-color: var(--secondary-color);
+  transform: translateY(-2px);
+}
+
+/* Parks Grid Section Styling */
+.parks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Auto columns */
+  gap: var(--spacing-md);
+  padding: 0 var(--spacing-md);
+}
+
+.park-card {
+  background-color: #f9f9f9;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--box-shadow);
+  transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+}
+
+.park-image {
+  height: 200px;
+  background-size: cover;
+  background-position: center;
+}
+
+.park-info {
+  padding: var(--spacing-sm);
+}
+
+.park-info h3 {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: var(--spacing-xs);
+}
+
+.park-info p {
+  color: #777;
+  margin-bottom: var(--spacing-sm);
+}
+
+.park-features {
+  margin-top: var(--spacing-xs);
+}
+
+.feature {
+  display: inline-block;
+  margin-right: 5px;
+  background-color: #007bff;
+  color: white;
+  padding: 5px;
+  border-radius: 3px;
+  font-size: 0.8rem;
+}
+
+.park-size {
+  margin-top: 10px;
+  font-size: 1rem;
+  color: #333;
+}
+
 /* Footer Styles */
 footer {
   background-color: var(--primary-color);
