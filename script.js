@@ -249,75 +249,6 @@ function setupSmoothScroll() {
   });
 }
 
-// Initialize everything when DOM is fully loaded
-document.addEventListener('DOMContentLoaded', () => {
-  // --- Firebase Authentication Integration ---
-  // Make sure your HTML has a Sign In button with the id "auth-button"
-  const authButton = document.getElementById('auth-button');
-  if (authButton) {
-    // Sign In function using Email/Password authentication
-    function signIn() {
-      const email = prompt("Enter your email:");
-      const password = prompt("Enter your password:");
-      if (email && password) {
-        window.signInWithEmailAndPassword(window.firebaseAuth, email, password)
-          .then(userCredential => {
-            alert("Successfully signed in!");
-            updateAuthUI(userCredential.user);
-          })
-          .catch(error => {
-            alert("Error signing in: " + error.message);
-          });
-      }
-    }
-  
-    // Sign Out function
-    function signOutUser() {
-      window.signOut(window.firebaseAuth)
-        .then(() => {
-          alert("You have been signed out.");
-          updateAuthUI(null);
-        })
-        .catch(error => {
-          alert("Error signing out: " + error.message);
-        });
-    }
-  
-    // Update the Sign In/Sign Out button based on auth state
-    function updateAuthUI(user) {
-      if (user) {
-        authButton.textContent = "Sign Out";
-        authButton.onclick = (e) => {
-          e.preventDefault();
-          signOutUser();
-        };
-      } else {
-        authButton.textContent = "Sign In";
-        authButton.onclick = (e) => {
-          e.preventDefault();
-          signIn();
-        };
-      }
-    }
-  
-    // Listen for auth state changes and update UI accordingly
-    window.onAuthStateChanged(window.firebaseAuth, (user) => {
-      updateAuthUI(user);
-    });
-  }
-  
-  // --- End of Firebase Auth Integration ---
-  
-  // Content population and UI enhancements
-  populateSpots();
-  populateCategories();
-  setupHeaderScroll();
-  setupMobileNav();
-  setupSmoothScroll();
-  setupCarousel();
-});
-
-
 // Authentication UI Management
 function setupAuthUI() {
   // Get DOM elements
@@ -336,10 +267,10 @@ function setupAuthUI() {
   function signOutUser() {
     window.signOut(window.firebaseAuth)
       .then(() => {
-        console.log("User signed out successfully");
+        showToast("You've been successfully signed out.", "success", "Goodbye!");
       })
       .catch(error => {
-        console.error("Error signing out:", error.message);
+        showToast(error.message, "error", "Sign Out Error");
       });
   }
   
@@ -356,6 +287,15 @@ function setupAuthUI() {
       
       // Add active class to header to show logged in state
       document.querySelector('header').classList.add('user-logged-in');
+      
+      // Show welcome toast if coming from auth success
+      const urlParams = new URLSearchParams(window.location.search);
+      const authParam = urlParams.get('auth');
+      if (authParam === 'success') {
+        showToast(`Welcome to Vancity Finds, ${displayName}!`, "success", "Successfully Logged In");
+        // Clear the URL parameter after handling
+        history.replaceState(null, null, window.location.pathname);
+      }
     } else {
       // User is signed out
       loggedOutButtons.style.display = 'flex';
@@ -374,22 +314,19 @@ function setupAuthUI() {
   window.onAuthStateChanged(window.firebaseAuth, (user) => {
     updateAuthUI(user);
   });
-  
-  // Check for authentication parameters in URL
-  const urlParams = new URLSearchParams(window.location.search);
-  const authMode = urlParams.get('auth');
-  
-  if (authMode === 'success') {
-    // Show a welcome toast/notification if user just logged in
-    alert('Welcome back to Vancity Finds!');
-    // Clear the URL parameter after handling
-    history.replaceState(null, null, window.location.pathname);
-  }
 }
 
-// Add to document ready function
+// Initialize everything when DOM is fully loaded
 document.addEventListener('DOMContentLoaded', () => {
-  // Existing initializations...
+  // Add toast container if it doesn't exist
+  if (!document.getElementById('toast-container')) {
+    const toastContainer = document.createElement('div');
+    toastContainer.id = 'toast-container';
+    toastContainer.className = 'toast-container';
+    document.body.appendChild(toastContainer);
+  }
+  
+  // Content population and UI enhancements
   populateSpots();
   if (typeof populateCategories === 'function') {
     populateCategories();

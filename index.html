@@ -21,23 +21,23 @@
           </div>
           
           <ul class="nav-menu">
-            <li><a href="#home">Home</a></li>
-            <li><a href="#categories">Browse Spots</a></li>
-            <li><a href="#footer">Contact</a></li>
-            <!-- Auth buttons container -->
-            <li class="auth-buttons">
-                <!-- Button shown when logged out -->
-                <div class="logged-out-buttons">
-                    <a href="auth.html?mode=login" class="btn login-btn">Log In</a>
-                    <a href="auth.html?mode=signup" class="btn signup-btn">Sign Up</a>
-                </div>
-                <!-- Button and indicator shown when logged in -->
-                <div class="logged-in-buttons" style="display: none;">
-                    <span class="user-greeting">Hello, <span class="username">User</span>!</span>
-                    <a href="#" class="btn logout-btn">Sign Out</a>
-                </div>
-            </li>
-        </ul>
+              <li><a href="#home">Home</a></li>
+              <li><a href="#categories">Browse Spots</a></li>
+              <li><a href="#footer">Contact</a></li>
+              <!-- Auth buttons container -->
+              <li class="auth-buttons">
+                  <!-- Button shown when logged out -->
+                  <div class="logged-out-buttons">
+                      <a href="auth.html?mode=login" class="btn login-btn">Log In</a>
+                      <a href="auth.html?mode=signup" class="btn signup-btn">Sign Up</a>
+                  </div>
+                  <!-- Button and indicator shown when logged in -->
+                  <div class="logged-in-buttons" style="display: none;">
+                      <span class="user-greeting">Hello, <span class="username">User</span>!</span>
+                      <a href="#" class="btn logout-btn">Sign Out</a>
+                  </div>
+              </li>
+          </ul>
           
           <div class="search-bar">
               <input type="text" placeholder="Search...">
@@ -135,6 +135,9 @@
           </div>
       </div>
   </footer>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
   
   <!-- Firebase SDK & Config -->
   <script type="module">
@@ -164,6 +167,131 @@
     window.signInWithEmailAndPassword = signInWithEmailAndPassword;
     window.signOut = signOut;
     window.onAuthStateChanged = onAuthStateChanged;
+  </script>
+  
+  <!-- Toast Notification Script -->
+  <script>
+  /**
+   * Toast Notification System
+   */
+  class ToastNotification {
+    constructor() {
+      this.init();
+    }
+
+    init() {
+      this.container = document.getElementById('toast-container');
+    }
+
+    /**
+     * Show a toast notification
+     * @param {Object} options - Toast options
+     * @param {string} options.title - Toast title
+     * @param {string} options.message - Toast message
+     * @param {string} options.type - Toast type (success, error)
+     * @param {number} options.duration - Duration in ms
+     */
+    show({ title = 'Success!', message = '', type = 'success', duration = 5000 }) {
+      // Create toast element
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      
+      // Create progress bar for auto-dismiss
+      const progressBar = document.createElement('div');
+      progressBar.className = 'toast-progress';
+      
+      // Add content to toast
+      toast.innerHTML = `
+        <div class="toast-icon">
+          ${type === 'success' ? 
+            '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>' : 
+            '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>'
+          }
+        </div>
+        <div class="toast-content">
+          <div class="toast-title">${title}</div>
+          <div class="toast-message">${message}</div>
+        </div>
+        <button class="toast-close" aria-label="Close">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      `;
+      
+      // Add progress bar for auto-dismiss
+      toast.appendChild(progressBar);
+      
+      // Add to container
+      this.container.appendChild(toast);
+      
+      // Close button functionality
+      const closeBtn = toast.querySelector('.toast-close');
+      closeBtn.addEventListener('click', () => {
+        this.dismiss(toast);
+      });
+      
+      // Animation for progress bar
+      progressBar.style.animation = `progress ${duration}ms linear forwards`;
+      
+      // Show toast with animation
+      setTimeout(() => {
+        toast.classList.add('show');
+      }, 10);
+      
+      // Auto dismiss
+      this.autoClose = setTimeout(() => {
+        this.dismiss(toast);
+      }, duration);
+    }
+    
+    /**
+     * Dismiss a toast notification
+     * @param {HTMLElement} toast - Toast element to dismiss
+     */
+    dismiss(toast) {
+      // Remove show class to trigger hide animation
+      toast.classList.remove('show');
+      
+      // Remove from DOM after animation completes
+      setTimeout(() => {
+        if (toast.parentNode) {
+          toast.parentNode.removeChild(toast);
+        }
+      }, 300);
+    }
+    
+    /**
+     * Show a success toast
+     * @param {string} message - Toast message
+     * @param {string} title - Toast title
+     */
+    success(message, title = 'Success!') {
+      this.show({ title, message, type: 'success' });
+    }
+    
+    /**
+     * Show an error toast
+     * @param {string} message - Toast message
+     * @param {string} title - Toast title
+     */
+    error(message, title = 'Error') {
+      this.show({ title, message, type: 'error' });
+    }
+  }
+
+  // Initialize toast notification system
+  const toast = new ToastNotification();
+
+  // Replace alert with toast
+  window.showToast = (message, type = 'success', title) => {
+    if (type === 'success') {
+      toast.success(message, title);
+    } else if (type === 'error') {
+      toast.error(message, title);
+    }
+  };
   </script>
   
   <!-- Main JavaScript file -->
