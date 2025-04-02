@@ -337,6 +337,89 @@
         alert("Error sending reset email: " + err.message);
       }
     });
+
+    // Add this at the end of the script section in auth.html
+document.addEventListener('DOMContentLoaded', () => {
+  // Check for mode parameter in URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const authMode = urlParams.get('mode');
+  
+  // If mode is 'login', show login form
+  if (authMode === 'login') {
+    document.getElementById('login-form').classList.remove('form-hidden');
+    document.getElementById('signup-form').classList.add('form-hidden');
+  }
+  
+  // If mode is 'signup', show signup form
+  if (authMode === 'signup') {
+    document.getElementById('signup-form').classList.remove('form-hidden');
+    document.getElementById('login-form').classList.add('form-hidden');
+  }
+  
+  // Add redirect after successful authentication
+  function redirectAfterAuth() {
+    window.location.href = "index.html?auth=success";
+  }
+  
+  // Update the success handlers
+  const originalSignInSuccess = async (userCredential) => {
+    alert("Successfully logged in!");
+    redirectAfterAuth();
+  };
+  
+  const originalSignUpSuccess = async (userCredential) => {
+    alert("Account created! You are now logged in.");
+    redirectAfterAuth();
+  };
+  
+  // Replace the existing success handlers
+  loginSubmitBtn.addEventListener('click', async () => {
+    const email = loginEmail.value.trim();
+    const password = loginPassword.value.trim();
+
+    if (!email || !password) {
+      alert("Please fill in all login fields.");
+      return;
+    }
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      redirectAfterAuth();
+    } catch (err) {
+      alert("Login error: " + err.message);
+    }
+  });
+  
+  signupSubmitBtn.addEventListener('click', async () => {
+    const email = signupEmail.value.trim();
+    const pass1 = signupPassword.value.trim();
+    const pass2 = signupPassword2.value.trim();
+
+    if (!email || !pass1 || !pass2) {
+      alert("Please fill in all signup fields.");
+      return;
+    }
+    if (pass1 !== pass2) {
+      alert("Passwords do not match.");
+      return;
+    }
+    try {
+      await createUserWithEmailAndPassword(auth, email, pass1);
+      redirectAfterAuth();
+    } catch (err) {
+      alert("Signup error: " + err.message);
+    }
+  });
+  
+  // Update Google sign in handler
+  const handleGoogleSignIn = async () => {
+    try {
+      await signInWithPopup(auth, googleProvider);
+      redirectAfterAuth();
+    } catch (err) {
+      alert("Google sign-in error: " + err.message);
+    }
+  };
+});
   </script>
 </body>
 </html>

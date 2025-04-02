@@ -316,3 +316,93 @@ document.addEventListener('DOMContentLoaded', () => {
   setupSmoothScroll();
   setupCarousel();
 });
+
+
+// Authentication UI Management
+function setupAuthUI() {
+  // Get DOM elements
+  const loggedOutButtons = document.querySelector('.logged-out-buttons');
+  const loggedInButtons = document.querySelector('.logged-in-buttons');
+  const usernameSpan = document.querySelector('.username');
+  const logoutBtn = document.querySelector('.logout-btn');
+  
+  // Make sure the elements exist
+  if (!loggedOutButtons || !loggedInButtons || !usernameSpan || !logoutBtn) {
+    console.error("Auth UI elements not found in the DOM");
+    return;
+  }
+  
+  // Sign Out function
+  function signOutUser() {
+    window.signOut(window.firebaseAuth)
+      .then(() => {
+        console.log("User signed out successfully");
+      })
+      .catch(error => {
+        console.error("Error signing out:", error.message);
+      });
+  }
+  
+  // Update UI based on auth state
+  function updateAuthUI(user) {
+    if (user) {
+      // User is signed in
+      loggedOutButtons.style.display = 'none';
+      loggedInButtons.style.display = 'flex';
+      
+      // Display user's name or email
+      const displayName = user.displayName || user.email.split('@')[0];
+      usernameSpan.textContent = displayName;
+      
+      // Add active class to header to show logged in state
+      document.querySelector('header').classList.add('user-logged-in');
+    } else {
+      // User is signed out
+      loggedOutButtons.style.display = 'flex';
+      loggedInButtons.style.display = 'none';
+      document.querySelector('header').classList.remove('user-logged-in');
+    }
+  }
+  
+  // Set up sign out button
+  logoutBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    signOutUser();
+  });
+  
+  // Listen for auth state changes
+  window.onAuthStateChanged(window.firebaseAuth, (user) => {
+    updateAuthUI(user);
+  });
+  
+  // Check for authentication parameters in URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const authMode = urlParams.get('auth');
+  
+  if (authMode === 'success') {
+    // Show a welcome toast/notification if user just logged in
+    alert('Welcome back to Vancity Finds!');
+    // Clear the URL parameter after handling
+    history.replaceState(null, null, window.location.pathname);
+  }
+}
+
+// Add to document ready function
+document.addEventListener('DOMContentLoaded', () => {
+  // Existing initializations...
+  populateSpots();
+  if (typeof populateCategories === 'function') {
+    populateCategories();
+  }
+  setupHeaderScroll();
+  setupMobileNav();
+  setupSmoothScroll();
+  setupCarousel();
+  
+  // Set up auth UI if Firebase is loaded
+  if (window.firebaseAuth) {
+    setupAuthUI();
+  } else {
+    console.error("Firebase Auth not initialized");
+  }
+});

@@ -21,13 +21,23 @@
           </div>
           
           <ul class="nav-menu">
-              <li><a href="#home">Home</a></li>
-              <li><a href="#categories">Browse Spots</a></li>
-              <li><a href="#footer">Contact</a></li>
-              <!-- Updated button with an ID for authentication -->
-              <li><a href="auth.html" class="btn">Sign Up</a></li>
-
-          </ul>
+            <li><a href="#home">Home</a></li>
+            <li><a href="#categories">Browse Spots</a></li>
+            <li><a href="#footer">Contact</a></li>
+            <!-- Auth buttons container -->
+            <li class="auth-buttons">
+                <!-- Button shown when logged out -->
+                <div class="logged-out-buttons">
+                    <a href="auth.html?mode=login" class="btn login-btn">Log In</a>
+                    <a href="auth.html?mode=signup" class="btn signup-btn">Sign Up</a>
+                </div>
+                <!-- Button and indicator shown when logged in -->
+                <div class="logged-in-buttons" style="display: none;">
+                    <span class="user-greeting">Hello, <span class="username">User</span>!</span>
+                    <a href="#" class="btn logout-btn">Sign Out</a>
+                </div>
+            </li>
+        </ul>
           
           <div class="search-bar">
               <input type="text" placeholder="Search...">
