@@ -329,7 +329,7 @@
         
         <div class="or-divider">or</div>
         
-        <a href="index.html" class="visitor-btn">View as Visitor</a>
+        <a href="index.php" class="visitor-btn">View as Visitor</a>
         
         <div class="toggle-section">
           Not Registered Yet?
@@ -361,7 +361,7 @@
         
         <div class="or-divider">or</div>
         
-        <a href="index.html" class="visitor-btn">View as Visitor</a>
+        <a href="index.php" class="visitor-btn">View as Visitor</a>
         
         <div class="toggle-section">
           Already have an account?
@@ -549,7 +549,7 @@
         showToast("Successfully logged in!", "success", "Welcome Back!");
         // Redirect to your main page after a short delay for the toast to be visible
         setTimeout(() => {
-          window.location.href = "index.html?auth=success";
+          window.location.href = "index.php?auth=success";
         }, 1500);
       } catch (err) {
         showToast(err.message, "error", "Login Error");
@@ -575,7 +575,7 @@
         showToast("Account created successfully!", "success", "Welcome to Vancity Finds!");
         // Redirect to your main page after a short delay for the toast to be visible
         setTimeout(() => {
-          window.location.href = "index.html?auth=success";
+          window.location.href = "index.php?auth=success";
         }, 1500);
       } catch (err) {
         showToast(err.message, "error", "Signup Error");
@@ -589,7 +589,7 @@
         showToast("Successfully signed in with Google!", "success", "Welcome!");
         // Redirect to your main page after a short delay for the toast to be visible
         setTimeout(() => {
-          window.location.href = "index.html?auth=success";
+          window.location.href = "index.php?auth=success";
         }, 1500);
       } catch (err) {
         showToast(err.message, "error", "Google Sign-In Error");

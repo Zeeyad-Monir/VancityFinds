@@ -89,7 +89,7 @@
                   </div>
               </a>
 
-                <a href="restaurants.php" style="text-decoration: none; color: inherit;">
+                <a href="parks.php" style="text-decoration: none; color: inherit;">
                     <div class="category-card">
                         <div class="category-icon" style="background-image: url('/api/placeholder/300/200')"></div>
                         <div class="category-name">Parks</div>
