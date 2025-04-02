@@ -135,6 +135,53 @@
     .form-hidden {
       display: none;
     }
+    
+    /* Visitor Button Styles */
+    .visitor-btn {
+      display: block;
+      width: 100%;
+      background-color: transparent;
+      color: #666;
+      border: 1px dashed #ccc;
+      border-radius: 4px;
+      padding: 0.6rem;
+      font-size: 0.9rem;
+      text-align: center;
+      margin-top: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .visitor-btn:hover {
+      background-color: #f8f8f8;
+      color: #333;
+      border-color: #999;
+    }
+    
+    .or-divider {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      margin: 1rem 0;
+      color: #999;
+      font-size: 0.85rem;
+    }
+    
+    .or-divider::before,
+    .or-divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .or-divider::before {
+      margin-right: 0.5rem;
+    }
+    
+    .or-divider::after {
+      margin-left: 0.5rem;
+    }
+    
     /* Media queries */
     @media (min-width: 900px) {
       .auth-illustration {
@@ -280,6 +327,10 @@
         
         <button class="submit-btn" id="login-submit-btn">Login</button>
         
+        <div class="or-divider">or</div>
+        
+        <a href="index.html" class="visitor-btn">View as Visitor</a>
+        
         <div class="toggle-section">
           Not Registered Yet?
           <a href="#" id="show-signup">Create an account</a>
@@ -307,6 +358,10 @@
         </div>
         
         <button class="submit-btn" id="signup-submit-btn">Sign Up</button>
+        
+        <div class="or-divider">or</div>
+        
+        <a href="index.html" class="visitor-btn">View as Visitor</a>
         
         <div class="toggle-section">
           Already have an account?
