@@ -24,7 +24,7 @@
     <!-- Header -->
     <header>
         <div class="container header-container">
-            <a href="index.html" class="logo">Vancity Finds</a>
+            <a href="index.php" class="logo">Vancity Finds</a>
             
             <div class="hamburger">
                 <div></div>
@@ -33,7 +33,7 @@
             </div>
             
             <ul class="nav-menu">
-                <li><a href="index.html">Home</a></li>
+                <li><a href="index.php">Home</a></li>
                 <li><a href="#categories">Browse Spots</a></li>
                 <li><a href="#footer">Contact</a></li>
                 <li><a href="#" class="btn">Sign In</a></li>
