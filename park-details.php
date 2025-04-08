@@ -2,10 +2,18 @@
 // Include database credentials
 require("db_credentials.php");
 
+// Include authentication system
+require_once("auth_system.php");
+
 // Start session if not already started
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
+// Get current user if logged in
+$current_user = get_current_user_app();
+$is_logged_in = ($current_user !== null);
+$is_guest = is_guest();
 
 // Function to check if user is logged in
 function is_user_logged_in() {
@@ -21,6 +29,10 @@ function get_current_user_id() {
 function get_current_user_display_name() {
     return isset($_SESSION['display_name']) ? $_SESSION['display_name'] : (isset($_SESSION['email']) ? explode('@', $_SESSION['email'])[0] : 'User');
 }
+
+// Google Custom Search API Integration for park images
+$google_api_key = 'AIzaSyBaGXSgmFYdoYL4WVuNuhzLAqDPV8m3OA8';  
+$search_engine_id = '65a27083bf3aa48dd'; 
 
 // Establish connection to the database
 $connection = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
@@ -53,6 +65,36 @@ if (!$park_result || mysqli_num_rows($park_result) == 0) {
 // Fetch the park details
 $park = mysqli_fetch_assoc($park_result);
 
+// Check if the park is in user's favorites
+$is_favorite = false;
+if ($is_logged_in) {
+    $user_id = $current_user['id'];
+    $favorites_query = "SELECT * FROM user_favorites WHERE user_id = ? AND park_id = ?";
+    $favorites_stmt = mysqli_prepare($connection, $favorites_query);
+    mysqli_stmt_bind_param($favorites_stmt, "ii", $user_id, $parkID);
+    mysqli_stmt_execute($favorites_stmt);
+    $favorites_result = mysqli_stmt_get_result($favorites_stmt);
+    $is_favorite = mysqli_num_rows($favorites_result) > 0;
+    mysqli_stmt_close($favorites_stmt);
+}
+
+// Fetch image from Google Custom Search API
+$query = urlencode($park['Name']);
+$google_search_url = "https://www.googleapis.com/customsearch/v1?q=$query&key=$google_api_key&cx=$search_engine_id&searchType=image&num=1";
+
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, $google_search_url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+$response = curl_exec($ch);
+curl_close($ch);
+
+$images = json_decode($response, true);
+if (isset($images['items'][0]['link'])) {
+    $image_url = $images['items'][0]['link'];
+} else {
+    $image_url = './photos/default-image.jpg';  // Fallback to default image if none found
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -62,7 +104,450 @@ $park = mysqli_fetch_assoc($park_result);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($park['Name']) ?> - Park Details</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --accent-color: #3b82f6;
+            --light-bg: #f8fafc;
+            --dark-bg: #1e293b;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --text-white: #f8fafc;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --transition: all 0.3s ease;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-dark);
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+        
+        /* Header Styling */
+        header {
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        
+        .logo:hover {
+            color: var(--secondary-color);
+        }
+        
+        /* Navigation Menu */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+        }
+        
+        .hamburger div {
+            width: 25px;
+            height: 3px;
+            background-color: var(--primary-color);
+            margin: 3px 0;
+            transition: var(--transition);
+        }
+        
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            align-items: center;
+        }
+        
+        .nav-menu li {
+            margin-left: 1.5rem;
+        }
+        
+        .nav-menu a {
+            color: var(--text-dark);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+        
+        .nav-menu a:hover {
+            color: var(--primary-color);
+        }
+        
+        /* Auth Buttons */
+        .auth-buttons {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logged-out-buttons, .logged-in-buttons {
+            display: flex;
+            align-items: center;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        
+        .login-btn {
+            color: var(--primary-color);
+            background-color: transparent;
+            border: 1px solid var(--primary-color);
+            margin-right: 0.5rem;
+        }
+        
+        .login-btn:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .signup-btn, .logout-btn {
+            color: white;
+            background-color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+        }
+        
+        .signup-btn:hover, .logout-btn:hover {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+        
+        .user-greeting {
+            margin-right: 1rem;
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+        
+        .username {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        /* Responsive Navigation */
+        @media (max-width: 768px) {
+            .hamburger {
+                display: flex;
+            }
+            
+            .nav-menu {
+                position: fixed;
+                top: 60px;
+                left: -100%;
+                flex-direction: column;
+                background-color: white;
+                width: 100%;
+                text-align: center;
+                transition: 0.3s;
+                box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+                padding: 2rem 0;
+                z-index: 99;
+            }
+            
+            .nav-menu.active {
+                left: 0;
+            }
+            
+            .nav-menu li {
+                margin: 1.5rem 0;
+            }
+            
+            .auth-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .logged-out-buttons, .logged-in-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .btn {
+                width: 80%;
+                margin: 0.5rem auto;
+                text-align: center;
+            }
+            
+            .login-btn {
+                margin-right: 0;
+            }
+            
+            .user-greeting {
+                margin-right: 0;
+                margin-bottom: 0.5rem;
+            }
+        }
+        
+        /* Park Details Section Styling */
+        .park-details-section {
+            padding: 3rem 0;
+            background-color: white;
+        }
+        
+        .park-details-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+        
+        @media (min-width: 768px) {
+            .park-details-container {
+                grid-template-columns: 1fr 1fr;
+                align-items: start;
+            }
+        }
+        
+        .park-info {
+            padding: 2rem;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+        
+        .park-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 0.5rem;
+        }
+        
+        .park-neighborhood {
+            font-size: 1.2rem;
+            color: var(--text-light);
+            margin-bottom: 2rem;
+            font-weight: 500;
+        }
+        
+        .park-details-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .park-detail-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.25rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .park-detail-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .detail-icon {
+            width: 40px;
+            height: 40px;
+            background-color: #ebf5ff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            color: var(--primary-color);
+            flex-shrink: 0;
+        }
+        
+        .detail-content {
+            flex: 1;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.25rem;
+            display: block;
+        }
+        
+        .detail-value {
+            color: var(--text-light);
+        }
+        
+        .detail-value.yes {
+            color: #10b981;
+            font-weight: 500;
+        }
+        
+        .detail-value.no {
+            color: #ef4444;
+            font-weight: 500;
+        }
+        
+        /* Park Image Styling */
+        .park-image-container {
+            position: relative;
+        }
+        
+        .park-image {
+            width: 100%;
+            height: 450px;
+            overflow: hidden;
+            position: relative;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+        
+        .park-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            transition: transform 0.5s ease;
+        }
+        
+        .park-image:hover img {
+            transform: scale(1.05);
+        }
+        
+        .image-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+            padding: 1.5rem;
+            color: white;
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+        }
+        
+        .image-overlay h3 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.5rem;
+        }
+        
+        .image-overlay p {
+            margin: 0;
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        
+        /* Heart icon styles */
+        .heart-icon {
+            cursor: pointer;
+            width: 24px;
+            height: 24px;
+            transition: all 0.3s ease;
+        }
+        
+        .heart-icon svg {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .heart-icon svg path {
+            fill: transparent;
+            stroke: var(--dark-color);
+            stroke-width: 2;
+            transition: all 0.3s ease;
+        }
+        
+        .heart-icon.active svg path {
+            fill: var(--accent-color);
+            stroke: var(--accent-color);
+        }
+        
+        .heart-icon:hover svg path {
+            stroke: var(--accent-color);
+        }
+        
+        /* Animation for heart when clicked */
+        @keyframes heartPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        .heart-pulse {
+            animation: heartPulse 0.3s ease;
+        }
+        
+        .favorite-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background-color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: var(--transition);
+            z-index: 10;
+        }
+        
+        .favorite-btn i {
+            color: #ef4444;
+            font-size: 1.25rem;
+        }
+        
+        .favorite-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        /* Park Features */
+        .park-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+        
+        .feature-badge {
+            background-color: #ebf5ff;
+            color: var(--primary-color);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+        }
+        
+        .feature-badge i {
+            margin-right: 0.5rem;
+        }
+        
         /* Review Section Styles */
         .reviews-section {
             margin-top: 2rem;
@@ -328,31 +813,191 @@ $park = mysqli_fetch_assoc($park_result);
             from { transform: scaleX(1); }
             to { transform: scaleX(0); }
         }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .park-title {
+                font-size: 2rem;
+            }
+            
+            .park-image {
+                height: 350px;
+            }
+            
+            .park-info, .park-image-container {
+                margin-bottom: 2rem;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- Header with Navigation from index.php -->
     <header>
         <div class="container header-container">
             <a href="index.php" class="logo">Vancity Finds</a>
+            
+            <div class="hamburger">
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+            
+            <ul class="nav-menu">
+                <li><a href="index.php">Home</a></li>
+                <li><a href="parks.php">Browse Spots</a></li>
+                <li><a href="favourites.php" id="favourites-link">Favourites</a></li>
+                <li><a href="#footer">Contact</a></li>
+                <!-- Auth buttons container -->
+                <li class="auth-buttons">
+                    <!-- Button shown when logged out -->
+                    <div class="logged-out-buttons" <?php if ($is_logged_in) echo 'style="display: none;"'; ?>>
+                        <a href="auth.php?mode=login" class="btn login-btn">Log In</a>
+                        <a href="auth.php?mode=signup" class="btn signup-btn">Sign Up</a>
+                    </div>
+                    <!-- Button and indicator shown when logged in -->
+                    <div class="logged-in-buttons" <?php if (!$is_logged_in) echo 'style="display: none;"'; ?>>
+                        <span class="user-greeting">Hello, <span class="username"><?php echo $is_logged_in ? htmlspecialchars($current_user['display_name']) : 'User'; ?></span>!</span>
+                        <a href="#" class="btn logout-btn">Sign Out</a>
+                    </div>
+                </li>
+            </ul>
         </div>
     </header>
 
     <section class="park-details-section">
         <div class="container">
-            <div class="park-details">
-                <h1><?= htmlspecialchars($park['Name']) ?></h1>
-                <p><strong>Official Name:</strong> <?= $park['Official'] == 1 ? 'Yes' : 'No' ?></p>
-                <p><strong>Advisories:</strong> <?= htmlspecialchars($park['Advisories']) ?: 'N/A' ?></p>
-                <p><strong>Special Features:</strong> <?= htmlspecialchars($park['SpecialFeatures']) == 'Y' ? 'Yes' : 'No' ?></p>
-                <p><strong>Facilities Available:</strong> <?= htmlspecialchars($park['Facilities']) == 'Y' ? 'Yes' : 'No' ?></p>
-                <p><strong>Washrooms Available:</strong> <?= htmlspecialchars($park['Washrooms']) == 'Y' ? 'Yes' : 'No' ?></p>
-                <p><strong>Location:</strong> <?= htmlspecialchars($park['StreetNumber']) ?> <?= htmlspecialchars($park['StreetName']) ?>, <?= htmlspecialchars($park['NeighbourhoodName']) ?></p>
-                <p><strong>Area:</strong> <?= htmlspecialchars($park['Hectare']) ?> hectares</p>
-
-                <!-- Park Image Placeholder -->
-                <div class="park-image">
-                    <!-- You can replace this with an actual image URL if available -->
-                    <img src="path_to_image.jpg" alt="<?= htmlspecialchars($park['Name']) ?>">
+            <div class="park-details-container">
+                <div class="park-info">
+                    <h1 class="park-title"><?= htmlspecialchars($park['Name']) ?></h1>
+                    <div class="park-neighborhood"><?= htmlspecialchars($park['NeighbourhoodName']) ?></div>
+                    
+                    <ul class="park-details-list">
+                        <li class="park-detail-item">
+                            <div class="detail-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="detail-content">
+                                <span class="detail-label">Official Name</span>
+                                <span class="detail-value <?= $park['Official'] == 1 ? 'yes' : 'no' ?>">
+                                    <?= $park['Official'] == 1 ? 'Yes' : 'No' ?>
+                                </span>
+                            </div>
+                        </li>
+                        
+                        <li class="park-detail-item">
+                            <div class="detail-icon">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="detail-content">
+                                <span class="detail-label">Advisories</span>
+                                <span class="detail-value">
+                                    <?= htmlspecialchars($park['Advisories']) ?: 'None' ?>
+                                </span>
+                            </div>
+                        </li>
+                        
+                        <li class="park-detail-item">
+                            <div class="detail-icon">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <div class="detail-content">
+                                <span class="detail-label">Special Features</span>
+                                <span class="detail-value <?= htmlspecialchars($park['SpecialFeatures']) == 'Y' ? 'yes' : 'no' ?>">
+                                    <?= htmlspecialchars($park['SpecialFeatures']) == 'Y' ? 'Yes' : 'No' ?>
+                                </span>
+                            </div>
+                        </li>
+                        
+                        <li class="park-detail-item">
+                            <div class="detail-icon">
+                                <i class="fas fa-building"></i>
+                            </div>
+                            <div class="detail-content">
+                                <span class="detail-label">Facilities Available</span>
+                                <span class="detail-value <?= htmlspecialchars($park['Facilities']) == 'Y' ? 'yes' : 'no' ?>">
+                                    <?= htmlspecialchars($park['Facilities']) == 'Y' ? 'Yes' : 'No' ?>
+                                </span>
+                            </div>
+                        </li>
+                        
+                        <li class="park-detail-item">
+                            <div class="detail-icon">
+                                <i class="fas fa-toilet"></i>
+                            </div>
+                            <div class="detail-content">
+                                <span class="detail-label">Washrooms Available</span>
+                                <span class="detail-value <?= htmlspecialchars($park['Washrooms']) == 'Y' ? 'yes' : 'no' ?>">
+                                    <?= htmlspecialchars($park['Washrooms']) == 'Y' ? 'Yes' : 'No' ?>
+                                </span>
+                            </div>
+                        </li>
+                        
+                        <li class="park-detail-item">
+                            <div class="detail-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div class="detail-content">
+                                <span class="detail-label">Location</span>
+                                <span class="detail-value">
+                                    <?= htmlspecialchars($park['StreetNumber']) ?> <?= htmlspecialchars($park['StreetName']) ?>, <?= htmlspecialchars($park['NeighbourhoodName']) ?>
+                                </span>
+                            </div>
+                        </li>
+                        
+                        <li class="park-detail-item">
+                            <div class="detail-icon">
+                                <i class="fas fa-ruler-combined"></i>
+                            </div>
+                            <div class="detail-content">
+                                <span class="detail-label">Area</span>
+                                <span class="detail-value">
+                                    <?= htmlspecialchars($park['Hectare']) ?> hectares
+                                </span>
+                            </div>
+                        </li>
+                    </ul>
+                    
+                    <div class="park-features">
+                        <?php if ($park['Facilities'] == 'Y'): ?>
+                            <div class="feature-badge">
+                                <i class="fas fa-volleyball-ball"></i> Sports Facilities
+                            </div>
+                        <?php endif; ?>
+                        
+                        <?php if ($park['Washrooms'] == 'Y'): ?>
+                            <div class="feature-badge">
+                                <i class="fas fa-restroom"></i> Washrooms
+                            </div>
+                        <?php endif; ?>
+                        
+                        <?php if ($park['SpecialFeatures'] == 'Y'): ?>
+                            <div class="feature-badge">
+                                <i class="fas fa-star"></i> Special Features
+                            </div>
+                        <?php endif; ?>
+                        
+                        <div class="feature-badge">
+                            <i class="fas fa-tree"></i> Green Space
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="park-image-container">
+                    <!-- Heart icon for favorites -->
+                    <div class="heart-icon <?= $is_favorite ? 'active' : '' ?>" data-park-id="<?= $parkID ?>">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                        </svg>
+                    </div>
+                    
+                    <div class="park-image">
+                        <img src="<?= $image_url ?>" alt="<?= htmlspecialchars($park['Name']) ?>">
+                        
+                        <div class="image-overlay">
+                            <h3>Visit <?= htmlspecialchars($park['Name']) ?></h3>
+                            <p>Explore this beautiful park in <?= htmlspecialchars($park['NeighbourhoodName']) ?></p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -403,7 +1048,7 @@ $park = mysqli_fetch_assoc($park_result);
         </div>
     </section>
 
-    <footer>
+    <footer id="footer">
         <div class="container">
             <div class="footer-content">
                 <div class="contact-info">
@@ -684,11 +1329,24 @@ $park = mysqli_fetch_assoc($park_result);
             reviewForm.addEventListener('submit', handleReviewSubmit);
         }
 
+        // Mobile navigation toggle
+        const hamburger = document.querySelector('.hamburger');
+        const navMenu = document.querySelector('.nav-menu');
+        
+        if (hamburger) {
+            hamburger.addEventListener('click', function() {
+                navMenu.classList.toggle('active');
+            });
+        }
+
         // Load reviews when page loads
         document.addEventListener('DOMContentLoaded', () => {
             loadReviews();
         });
     </script>
+    
+    <!-- Include favorites.js for heart icon functionality -->
+    <script src="favorites.js"></script>
 </body>
 </html>
 

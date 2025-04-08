@@ -6,39 +6,30 @@ require_once("auth_system.php");
 $current_user = get_current_user_app();
 $is_logged_in = ($current_user !== null);
 
+// Initialize response array
+$response = array(
+    'success' => false,
+    'message' => '',
+    'is_favorite' => false
+);
+
 // Check if user is logged in
 if (!$is_logged_in) {
-    // Return error if not logged in
-    header('Content-Type: application/json');
-    echo json_encode([
-        'success' => false,
-        'message' => 'You must be logged in to favorite parks'
-    ]);
+    $response['message'] = 'You must be logged in to manage favorites';
+    echo json_encode($response);
     exit;
 }
 
-// Check if request method is POST
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Content-Type: application/json');
-    echo json_encode([
-        'success' => false,
-        'message' => 'Invalid request method'
-    ]);
+// Check if park_id is provided
+if (!isset($_POST['park_id']) || empty($_POST['park_id'])) {
+    $response['message'] = 'Park ID is required';
+    echo json_encode($response);
     exit;
 }
 
-// Get park ID from POST data
-$park_id = isset($_POST['park_id']) ? intval($_POST['park_id']) : 0;
-
-// Validate park ID
-if ($park_id <= 0) {
-    header('Content-Type: application/json');
-    echo json_encode([
-        'success' => false,
-        'message' => 'Invalid park ID'
-    ]);
-    exit;
-}
+// Get user ID and park ID
+$user_id = $current_user['id'];
+$park_id = $_POST['park_id'];
 
 // Establish connection to the database
 require_once("db_credentials.php");
@@ -46,95 +37,55 @@ $connection = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
 
 // Check if the connection was successful
 if (mysqli_connect_errno()) {
-    header('Content-Type: application/json');
-    echo json_encode([
-        'success' => false,
-        'message' => 'Database connection failed: ' . mysqli_connect_error()
-    ]);
+    $response['message'] = 'Database connection error: ' . mysqli_connect_error();
+    echo json_encode($response);
     exit;
 }
 
-// Get user ID
-$user_id = $current_user['id'];
+// Check if the park is already in favorites
+$check_query = "SELECT * FROM user_favorites WHERE user_id = ? AND park_id = ?";
+$check_stmt = mysqli_prepare($connection, $check_query);
+mysqli_stmt_bind_param($check_stmt, "ii", $user_id, $park_id);
+mysqli_stmt_execute($check_stmt);
+$check_result = mysqli_stmt_get_result($check_stmt);
 
-// Check if park exists
-$check_park_query = "SELECT ParkID FROM parks WHERE ParkID = ?";
-$check_park_stmt = mysqli_prepare($connection, $check_park_query);
-mysqli_stmt_bind_param($check_park_stmt, "i", $park_id);
-mysqli_stmt_execute($check_park_stmt);
-mysqli_stmt_store_result($check_park_stmt);
-
-if (mysqli_stmt_num_rows($check_park_stmt) === 0) {
-    mysqli_stmt_close($check_park_stmt);
-    mysqli_close($connection);
+// If park is already in favorites, remove it
+if (mysqli_num_rows($check_result) > 0) {
+    $delete_query = "DELETE FROM user_favorites WHERE user_id = ? AND park_id = ?";
+    $delete_stmt = mysqli_prepare($connection, $delete_query);
+    mysqli_stmt_bind_param($delete_stmt, "ii", $user_id, $park_id);
     
-    header('Content-Type: application/json');
-    echo json_encode([
-        'success' => false,
-        'message' => 'Park not found'
-    ]);
-    exit;
-}
-
-mysqli_stmt_close($check_park_stmt);
-
-// Check if park is already in favorites
-$check_favorite_query = "SELECT id FROM user_favorites WHERE user_id = ? AND park_id = ?";
-$check_favorite_stmt = mysqli_prepare($connection, $check_favorite_query);
-mysqli_stmt_bind_param($check_favorite_stmt, "ii", $user_id, $park_id);
-mysqli_stmt_execute($check_favorite_stmt);
-mysqli_stmt_store_result($check_favorite_stmt);
-
-$is_favorite = (mysqli_stmt_num_rows($check_favorite_stmt) > 0);
-mysqli_stmt_close($check_favorite_stmt);
-
-if ($is_favorite) {
-    // Remove from favorites
-    $remove_query = "DELETE FROM user_favorites WHERE user_id = ? AND park_id = ?";
-    $remove_stmt = mysqli_prepare($connection, $remove_query);
-    mysqli_stmt_bind_param($remove_stmt, "ii", $user_id, $park_id);
-    $result = mysqli_stmt_execute($remove_stmt);
-    
-    if ($result) {
-        header('Content-Type: application/json');
-        echo json_encode([
-            'success' => true,
-            'is_favorite' => false,
-            'message' => 'Park removed from favorites'
-        ]);
+    if (mysqli_stmt_execute($delete_stmt)) {
+        $response['success'] = true;
+        $response['message'] = 'Park removed from favorites';
+        $response['is_favorite'] = false;
     } else {
-        header('Content-Type: application/json');
-        echo json_encode([
-            'success' => false,
-            'message' => 'Failed to remove park from favorites: ' . mysqli_error($connection)
-        ]);
+        $response['message'] = 'Error removing park from favorites: ' . mysqli_error($connection);
     }
     
-    mysqli_stmt_close($remove_stmt);
-} else {
-    // Add to favorites
-    $add_query = "INSERT INTO user_favorites (user_id, park_id) VALUES (?, ?)";
-    $add_stmt = mysqli_prepare($connection, $add_query);
-    mysqli_stmt_bind_param($add_stmt, "ii", $user_id, $park_id);
-    $result = mysqli_stmt_execute($add_stmt);
+    mysqli_stmt_close($delete_stmt);
+} 
+// If park is not in favorites, add it
+else {
+    $insert_query = "INSERT INTO user_favorites (user_id, park_id, created_at) VALUES (?, ?, NOW())";
+    $insert_stmt = mysqli_prepare($connection, $insert_query);
+    mysqli_stmt_bind_param($insert_stmt, "ii", $user_id, $park_id);
     
-    if ($result) {
-        header('Content-Type: application/json');
-        echo json_encode([
-            'success' => true,
-            'is_favorite' => true,
-            'message' => 'Park added to favorites'
-        ]);
+    if (mysqli_stmt_execute($insert_stmt)) {
+        $response['success'] = true;
+        $response['message'] = 'Park added to favorites';
+        $response['is_favorite'] = true;
     } else {
-        header('Content-Type: application/json');
-        echo json_encode([
-            'success' => false,
-            'message' => 'Failed to add park to favorites: ' . mysqli_error($connection)
-        ]);
+        $response['message'] = 'Error adding park to favorites: ' . mysqli_error($connection);
     }
     
-    mysqli_stmt_close($add_stmt);
+    mysqli_stmt_close($insert_stmt);
 }
 
+mysqli_stmt_close($check_stmt);
 mysqli_close($connection);
+
+// Return JSON response
+header('Content-Type: application/json');
+echo json_encode($response);
 ?>

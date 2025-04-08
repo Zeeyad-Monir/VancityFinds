@@ -1,8 +1,6 @@
 <?php
 // Include authentication system
 require_once("auth_system.php");
-// Include park image API
-require_once("park_image_api.php");
 
 // Get current user if logged in
 $current_user = get_current_user_app();
@@ -107,6 +105,11 @@ if (!$all_parks_result) {
     echo "Error with database query: " . mysqli_error($connection);
     exit();
 }
+
+// Google Custom Search API Integration for park images
+$google_api_key = 'AIzaSyBt315xmQp1AKPFJYyfx8SV5vT1gcqOJ-Y';  
+$search_engine_id = '65a27083bf3aa48dd'; 
+
 ?>
 
 <!DOCTYPE html>
@@ -174,12 +177,210 @@ if (!$all_parks_result) {
         /* Park card positioning */
         .park-card-container {
             position: relative;
+            background-color: #f8f8f8;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .park-card-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
         }
         
         .park-card {
             display: block;
             text-decoration: none;
             color: inherit;
+        }
+        
+        /* Park image styling - FIXED */
+        .park-image {
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .park-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .park-card:hover .park-image img {
+            transform: scale(1.05);
+        }
+        
+        /* Park info styling */
+        .park-info {
+            padding: 15px;
+        }
+        
+        .park-info h3 {
+            margin: 0 0 5px 0;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .park-info p {
+            margin: 0 0 10px 0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        /* Park features styling */
+        .park-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+        
+        .feature {
+            background-color: #007bff;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        /* Park size styling */
+        .park-size {
+            font-size: 0.9rem;
+            color: #555;
+            margin-top: 5px;
+        }
+        
+        /* Parks grid layout */
+        .parks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .parks-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+            
+            .park-image {
+                height: 180px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .parks-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Toast Notification Styles */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 350px;
+            width: 100%;
+            pointer-events: none;
+        }
+
+        .toast {
+            display: flex;
+            align-items: center;
+            background-color: white;
+            border-left: 4px solid #38a169;
+            border-radius: 6px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+            margin-bottom: 16px;
+            padding: 16px;
+            transform: translateX(120%);
+            transition: transform 0.3s ease-in-out;
+            pointer-events: auto;
+            opacity: 0;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .toast-success {
+            border-left-color: #38a169;
+        }
+
+        .toast-error {
+            border-left-color: #e53e3e;
+        }
+
+        .toast-icon {
+            color: #38a169;
+            flex-shrink: 0;
+            margin-right: 12px;
+        }
+
+        .toast-error .toast-icon {
+            color: #e53e3e;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+            color: #1a202c;
+        }
+
+        .toast-message {
+            font-size: 0.85rem;
+            color: #4a5568;
+        }
+
+        .toast-close {
+            background: transparent;
+            border: none;
+            color: #a0aec0;
+            cursor: pointer;
+            padding: 4px;
+            margin-left: 8px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .toast-close:hover {
+            background-color: #f7fafc;
+            color: #718096;
+        }
+
+        /* Progress Bar for Auto-dismiss */
+        .toast-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background-color: rgba(66, 153, 225, 0.5);
+            width: 100%;
+            border-radius: 0 0 6px 6px;
+            transform-origin: left;
+        }
+
+        /* Toast animation */
+        @keyframes progress {
+            from { transform: scaleX(1); }
+            to { transform: scaleX(0); }
         }
     </style>
 </head>
@@ -288,6 +489,26 @@ if (!$all_parks_result) {
             <div class="parks-grid">
                 <?php if (mysqli_num_rows($all_parks_result) > 0): ?>
                     <?php while ($park = mysqli_fetch_assoc($all_parks_result)): ?>
+                        <?php
+                        // Check if the image URL is stored in the database
+                        // If not found in DB, fetch image from Google Custom Search API
+                        $query = urlencode($park['Name']);
+                        $google_search_url = "https://www.googleapis.com/customsearch/v1?q=$query&key=$google_api_key&cx=$search_engine_id&searchType=image&num=1";
+
+                        $ch = curl_init();
+                        curl_setopt($ch, CURLOPT_URL, $google_search_url);
+                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                        $response = curl_exec($ch);
+                        curl_close($ch);
+
+                        $images = json_decode($response, true);
+                        if (isset($images['items'][0]['link'])) {
+                            $image_url = $images['items'][0]['link'];
+                        } else {
+                            $image_url = './photos/default-image.jpg';  // Fallback to default image if none found
+                        }
+                
+                        ?>
                         <div class="park-card-container">
                             <!-- Heart icon for favorites -->
                             <div class="heart-icon <?= in_array($park['ParkID'], $user_favorites) ? 'active' : '' ?>" data-park-id="<?= $park['ParkID'] ?>">
@@ -298,7 +519,11 @@ if (!$all_parks_result) {
                             
                             <!-- Park Card with Link to Details -->
                             <a href="park-details.php?id=<?= $park['ParkID'] ?>" class="park-card">
-                                <div class="park-image" style="background-image:url('<?php echo get_park_image($park['Name'], $park['NeighbourhoodName']); ?>')"></div>
+                                <!-- Park Image -->
+                                <div class="park-image">
+                                    <img src="<?= $image_url ? $image_url : 'default-image.jpg' ?>" alt="<?= htmlspecialchars($park['Name']) ?>">
+                                </div>
+
                                 <div class="park-info">
                                     <h3><?= htmlspecialchars($park['Name']) ?></h3>
                                     <p><?= htmlspecialchars($park['NeighbourhoodName']) ?></p>
@@ -341,197 +566,123 @@ if (!$all_parks_result) {
     <!-- Toast Notification Container -->
     <div id="toast-container" class="toast-container"></div>
     
-    <!-- Toast Notification Script -->
+    <!-- Toast Notification System -->
     <script>
-    /**
-     * Toast Notification System
-     */
-    class ToastNotification {
-      constructor() {
-        this.init();
-      }
-
-      init() {
-        this.container = document.getElementById('toast-container');
-      }
-
-      show({ title = 'Success!', message = '', type = 'success', duration = 5000 }) {
-        // Create toast element
-        const toast = document.createElement('div');
-        toast.className = `toast toast-${type}`;
-        
-        // Create progress bar for auto-dismiss
-        const progressBar = document.createElement('div');
-        progressBar.className = 'toast-progress';
-        
-        // Add content to toast
-        toast.innerHTML = `
-          <div class="toast-icon">
-            ${type === 'success' ? 
-              '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>' : 
-              '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>'
+        /***** Toast Notification System *****/
+        class ToastNotification {
+            constructor() {
+                this.init();
             }
-          </div>
-          <div class="toast-content">
-            <div class="toast-title">${title}</div>
-            <div class="toast-message">${message}</div>
-          </div>
-          <button class="toast-close" aria-label="Close">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
-        `;
-        
-        // Add progress bar for auto-dismiss
-        toast.appendChild(progressBar);
-        
-        // Add to container
-        this.container.appendChild(toast);
-        
-        // Close button functionality
-        const closeBtn = toast.querySelector('.toast-close');
-        closeBtn.addEventListener('click', () => {
-          this.dismiss(toast);
-        });
-        
-        // Animation for progress bar
-        progressBar.style.animation = `progress ${duration}ms linear forwards`;
-        
-        // Show toast with animation
-        setTimeout(() => {
-          toast.classList.add('show');
-        }, 10);
-        
-        // Auto dismiss
-        setTimeout(() => {
-          this.dismiss(toast);
-        }, duration);
-      }
 
-      dismiss(toast) {
-        toast.classList.add('hide');
-        setTimeout(() => {
-          if (toast.parentNode) {
-            this.container.removeChild(toast);
-          }
-        }, 300);
-      }
-      
-      success(message, title = 'Success!') {
-        this.show({ title, message, type: 'success' });
-      }
-      
-      error(message, title = 'Error') {
-        this.show({ title, message, type: 'error' });
-      }
-    }
-
-    // Initialize toast notification system
-    const toast = new ToastNotification();
-
-    // Check if user is logged in
-    const isLoggedIn = <?php echo $is_logged_in ? 'true' : 'false'; ?>;
-    
-    // Add event listener to favourites link
-    document.addEventListener('DOMContentLoaded', function() {
-      const favouritesLink = document.getElementById('favourites-link');
-      if (favouritesLink && !isLoggedIn) {
-        favouritesLink.addEventListener('click', function(e) {
-          e.preventDefault();
-          toast.error('Please log in to view your favourites', 'Access Restricted');
-        });
-      }
-      
-      // Add event listeners to heart icons
-      const heartIcons = document.querySelectorAll('.heart-icon');
-      heartIcons.forEach(icon => {
-        icon.addEventListener('click', function(e) {
-          // Prevent the click from propagating to the card link
-          e.stopPropagation();
-          
-          if (!isLoggedIn) {
-            toast.error('Please log in to add parks to your favourites', 'Login Required');
-            return;
-          }
-          
-          const parkId = this.getAttribute('data-park-id');
-          toggleFavorite(parkId, this);
-        });
-      });
-      
-      // Function to toggle favorite status
-      function toggleFavorite(parkId, heartIcon) {
-        // Add pulse animation
-        heartIcon.classList.add('heart-pulse');
-        
-        // Create form data
-        const formData = new FormData();
-        formData.append('park_id', parkId);
-        
-        // Send request to toggle favorite
-        fetch('toggle_favorite.php', {
-          method: 'POST',
-          body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            if (data.is_favorite) {
-              heartIcon.classList.add('active');
-              toast.success('Park added to your favourites');
-            } else {
-              heartIcon.classList.remove('active');
-              toast.success('Park removed from your favourites');
+            init() {
+                this.container = document.getElementById('toast-container');
+                if (!this.container) {
+                    this.container = document.createElement('div');
+                    this.container.id = 'toast-container';
+                    this.container.className = 'toast-container';
+                    document.body.appendChild(this.container);
+                }
             }
-          } else {
-            toast.error(data.message);
-          }
-          
-          // Remove pulse animation after a delay
-          setTimeout(() => {
-            heartIcon.classList.remove('heart-pulse');
-          }, 300);
-        })
-        .catch(error => {
-          console.error('Error:', error);
-          toast.error('An error occurred while updating your favourites');
-          
-          // Remove pulse animation
-          heartIcon.classList.remove('heart-pulse');
-        });
-      }
-      
-      // Logout functionality
-      const logoutBtn = document.querySelector('.logout-btn');
-      if (logoutBtn) {
-        logoutBtn.addEventListener('click', function(e) {
-          e.preventDefault();
-          
-          // Send logout request
-          fetch('auth_system.php?action=logout', {
-            method: 'POST'
-          })
-          .then(response => response.json())
-          .then(data => {
-            if (data.success) {
-              // Show success toast
-              toast.success('You have been successfully logged out', 'Logged Out');
-              
-              // Redirect to home page after a short delay
-              setTimeout(() => {
-                window.location.href = 'index.php?logout=success';
-              }, 1500);
+
+            show({ title = 'Success!', message = '', type = 'success', duration = 5000 }) {
+                // Create toast element
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type}`;
+                
+                // Create progress bar for auto-dismiss
+                const progressBar = document.createElement('div');
+                progressBar.className = 'toast-progress';
+                
+                // Add content to toast
+                toast.innerHTML = `
+                    <div class="toast-icon">
+                        ${type === 'success' ? 
+                            '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>' : 
+                            '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>'
+                        }
+                    </div>
+                    <div class="toast-content">
+                        <div class="toast-title">${title}</div>
+                        <div class="toast-message">${message}</div>
+                    </div>
+                    <button class="toast-close" aria-label="Close">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                `;
+                
+                // Add progress bar for auto-dismiss
+                toast.appendChild(progressBar);
+                
+                // Add to container
+                this.container.appendChild(toast);
+                
+                // Close button functionality
+                const closeBtn = toast.querySelector('.toast-close');
+                closeBtn.addEventListener('click', () => {
+                    this.dismiss(toast);
+                });
+                
+                // Animation for progress bar
+                progressBar.style.animation = `progress ${duration}ms linear forwards`;
+                
+                // Show toast with animation
+                setTimeout(() => {
+                    toast.classList.add('show');
+                }, 10);
+                
+                // Auto dismiss
+                this.autoClose = setTimeout(() => {
+                    this.dismiss(toast);
+                }, duration);
             }
-          })
-          .catch(error => {
-            console.error('Error:', error);
-            toast.error('An error occurred while logging out', 'Error');
-          });
-        });
-      }
-    });
+            
+            dismiss(toast) {
+                // Remove show class to trigger hide animation
+                toast.classList.remove('show');
+                
+                // Remove from DOM after animation completes
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }
+            
+            success(message, title = 'Success!') {
+                this.show({ title, message, type: 'success' });
+            }
+            
+            error(message, title = 'Error') {
+                this.show({ title, message, type: 'error' });
+            }
+        }
+
+        // Initialize toast notification system
+        const toast = new ToastNotification();
+
+        // Replace alert with toast
+        window.showToast = (message, type = 'success', title) => {
+            if (type === 'success') {
+                toast.success(message, title);
+            } else if (type === 'error') {
+                toast.error(message, title);
+            }
+        };
+
+        // Current user information
+        const currentUser = {
+            isLoggedIn: <?= $is_logged_in ? 'true' : 'false' ?>,
+            id: <?= $is_logged_in ? $current_user['id'] : 'null' ?>
+        };
     </script>
+    
+    <!-- Include favorites.js for heart icon functionality -->
+    <script src="favorites.js"></script>
+    
+    <!-- Parks page specific JavaScript -->
+    <script src="parks.js"></script>
 </body>
 </html>

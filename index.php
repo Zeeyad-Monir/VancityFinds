@@ -5,29 +5,74 @@ error_reporting(E_ALL);
 
 // Include authentication system
 require_once("auth_system.php");
-// Include park image API
-require_once("park_image_api.php");
 
 // Get current user if logged in
 $current_user = get_current_user_app();
 $is_logged_in = ($current_user !== null);
 $is_guest = is_guest();
+
+// Google Custom Search API Integration for park images
+$google_api_key = 'AIzaSyAIeCH_KgShIDgt59j9SSkFWoj9v6ys79Y';  
+$search_engine_id = '65a27083bf3aa48dd'; 
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Discover Vancouver's hidden gems and local favorites with Vancity Finds.">
-  <meta name="keywords" content="Vancouver, local spots, hidden gems, cafes, restaurants, outdoor activities">
-  <title>Vancity Finds</title>
+  <meta name="description" content="Discover Vancouver's hidden parks and local favorites with Vancity Parks.">
+  <meta name="keywords" content="Discover Vancouver's hidden parks and local favorites with Vancity Parks">
+  <title>Vancity Parks</title>
   <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Park image styling */
+    .spot-image {
+        width: 100%;
+        height: 200px;
+        overflow: hidden;
+        position: relative;
+        border-radius: 8px 8px 0 0;
+    }
+    
+    .spot-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        transition: transform 0.3s ease;
+    }
+    
+    .spot-card:hover .spot-image img {
+        transform: scale(1.05);
+    }
+    
+    /* Category image styling */
+    .category-icon {
+        width: 100%;
+        height: 150px;
+        overflow: hidden;
+        position: relative;
+        border-radius: 8px 8px 0 0;
+    }
+    
+    .category-icon img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        transition: transform 0.3s ease;
+    }
+    
+    .category-card:hover .category-icon img {
+        transform: scale(1.05);
+    }
+  </style>
 </head>
 <body>
   <!-- Header -->
   <header>
       <div class="container header-container">
-          <a href="#home" class="logo">Vancity Finds</a>
+          <a href="#home" class="logo">Vancity Parks</a>
           
           <div class="hamburger">
               <div></div>
@@ -67,8 +112,8 @@ $is_guest = is_guest();
     <div class="hero-background"></div>
     <div class="hero-white-layer"></div>
     <div class="hero-content">
-        <h1>Discover Vancouver's Hidden Gems</h1>
-        <p>Explore unique local spots curated by Vancouverites who know the city best.</p>
+        <h1>Discover Vancouver's Parks</h1>
+        <p>Explore unique local Parks curated by Vancouverites who know the city best.</p>
         <a href="#trending" class="btn cta-button">Explore Spots</a>
     </div>
   </section>
@@ -95,9 +140,28 @@ $is_guest = is_guest();
                       if ($park['Washrooms'] == 'Y') $features[] = 'Washrooms';
                       if ($park['SpecialFeatures'] == 'Y') $features[] = 'Special Features';
                       $description = !empty($features) ? implode(', ', $features) : 'Park';
+                      
+                      // Fetch image from Google Custom Search API
+                      $query = urlencode($park['Name']);
+                      $google_search_url = "https://www.googleapis.com/customsearch/v1?q=$query&key=$google_api_key&cx=$search_engine_id&searchType=image&num=1";
+
+                      $ch = curl_init();
+                      curl_setopt($ch, CURLOPT_URL, $google_search_url);
+                      curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                      $response = curl_exec($ch);
+                      curl_close($ch);
+
+                      $images = json_decode($response, true);
+                      if (isset($images['items'][0]['link'])) {
+                          $image_url = $images['items'][0]['link'];
+                      } else {
+                          $image_url = './photos/default-image.jpg';  // Fallback to default image if none found
+                      }
                   ?>
                   <div class="spot-card">
-                      <div class="spot-image" style="background-image: url('<?php echo get_park_image($park['Name'], $park['NeighbourhoodName']); ?>')"></div>
+                      <div class="spot-image">
+                          <img src="<?= $image_url ?>" alt="<?= htmlspecialchars($park['Name']) ?>">
+                      </div>
                       <div class="spot-content">
                           <span class="spot-category"><?= htmlspecialchars($park['NeighbourhoodName']) ?></span>
                           <h3 class="spot-title"><?= htmlspecialchars($park['Name']) ?></h3>
@@ -128,9 +192,28 @@ $is_guest = is_guest();
           <div class="carousel-container">
               <?php if (count($favorite_parks) > 0): ?>
                   <div class="spots-carousel" id="favorites-container">
-                      <?php foreach ($favorite_parks as $park): ?>
+                      <?php foreach ($favorite_parks as $park): 
+                          // Fetch image from Google Custom Search API
+                          $query = urlencode($park['Name']);
+                          $google_search_url = "https://www.googleapis.com/customsearch/v1?q=$query&key=$google_api_key&cx=$search_engine_id&searchType=image&num=1";
+
+                          $ch = curl_init();
+                          curl_setopt($ch, CURLOPT_URL, $google_search_url);
+                          curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                          $response = curl_exec($ch);
+                          curl_close($ch);
+
+                          $images = json_decode($response, true);
+                          if (isset($images['items'][0]['link'])) {
+                              $image_url = $images['items'][0]['link'];
+                          } else {
+                              $image_url = './photos/default-image.jpg';  // Fallback to default image if none found
+                          }
+                      ?>
                           <div class="spot-card">
-                              <div class="spot-image" style="background-image: url('/api/placeholder/400/300')"></div>
+                              <div class="spot-image">
+                                  <img src="<?= $image_url ?>" alt="<?= htmlspecialchars($park['Name']) ?>">
+                              </div>
                               <div class="spot-content">
                                   <span class="spot-category"><?= htmlspecialchars($park['NeighbourhoodName']) ?></span>
                                   <h3 class="spot-title"><?= htmlspecialchars($park['Name']) ?></h3>
@@ -166,28 +249,40 @@ $is_guest = is_guest();
           <div class="categories-grid">
               <a href="parks.php" style="text-decoration: none; color: inherit;">
                   <div class="category-card">
-                      <div class="category-icon" style="background-image: url('/api/placeholder/300/200')"></div>
+                      <div class="category-icon">
+                          <!-- Using specific local image for All Parks -->
+                          <img src="./photos/all-parks.jpg" alt="All Parks">
+                      </div>
                       <div class="category-name">All Parks</div>
                   </div>
               </a>
 
               <a href="parks.php?category=small" style="text-decoration: none; color: inherit;">
                   <div class="category-card">
-                      <div class="category-icon" style="background-image: url('/api/placeholder/300/200')"></div>
+                      <div class="category-icon">
+                          <!-- Using specific local image for Small Parks -->
+                          <img src="./photos/small-park.jpeg" alt="Small Parks">
+                      </div>
                       <div class="category-name">Small Parks</div>
                   </div>
               </a>
 
               <a href="parks.php?category=medium" style="text-decoration: none; color: inherit;">
                   <div class="category-card">
-                      <div class="category-icon" style="background-image: url('/api/placeholder/300/200')"></div>
+                      <div class="category-icon">
+                          <!-- Using specific local image for Medium Parks -->
+                          <img src="./photos/medium-park.webp" alt="Medium Parks">
+                      </div>
                       <div class="category-name">Medium Parks</div>
                   </div>
               </a>
 
               <a href="parks.php?category=large" style="text-decoration: none; color: inherit;">
                   <div class="category-card">
-                      <div class="category-icon" style="background-image: url('/api/placeholder/300/200')"></div>
+                      <div class="category-icon">
+                          <!-- Using specific local image for Large Parks -->
+                          <img src="./photos/large-park.jpg" alt="Large Parks">
+                      </div>
                       <div class="category-name">Large Parks</div>
                   </div>
               </a>
@@ -399,9 +494,12 @@ $is_guest = is_guest();
             
             if (data.success) {
               window.location.href = 'index.php?auth=logout';
+            } else {
+              toast.error(data.message || 'Logout failed');
             }
-          } catch (err) {
-            console.error('Logout error:', err);
+          } catch (error) {
+            toast.error('An error occurred during logout');
+            console.error('Logout error:', error);
           }
         });
       }
