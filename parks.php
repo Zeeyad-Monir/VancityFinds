@@ -136,41 +136,42 @@ if (!$all_parks_result) {
 
 
     <!-- Parks Grid Section -->
-    <section class="parks-section" id="all-parks">
-        <div class="container">
-            <h2 class="parks-title">All Parks</h2>
-            <p class="parks-description">Explore all parks in Vancouver, from large green spaces to small neighborhood parks.</p>
+<section class="parks-section" id="all-parks">
+    <div class="container">
+        <h2 class="parks-title">All Parks</h2>
+        <p class="parks-description">Explore all parks in Vancouver, from large green spaces to small neighborhood parks.</p>
 
-            <!-- Park Cards Container -->
-            <div class="parks-grid">
-                <?php if (mysqli_num_rows($all_parks_result) > 0): ?>
-                    <?php while ($park = mysqli_fetch_assoc($all_parks_result)): ?>
-                        <div class="park-card">
-                            <div class="park-image" style="background-image:url('/api/placeholder/300/200')"></div>
-                            <div class="park-info">
-                                <h3><?= htmlspecialchars($park['Name']) ?></h3>
-                                <p><?= htmlspecialchars($park['NeighbourhoodName']) ?></p>
-                                <div class="park-features">
-                                    <?php if ($park['Facilities'] == 'Y'): ?>
-                                        <span class="feature">Facilities</span>
-                                    <?php endif; ?>
-                                    <?php if ($park['Washrooms'] == 'Y'): ?>
-                                        <span class="feature">Washrooms</span>
-                                    <?php endif; ?>
-                                    <?php if ($park['SpecialFeatures'] == 'Y'): ?>
-                                        <span class="feature">Special Features</span>
-                                    <?php endif; ?>
-                                </div>
-                                <div class="park-size"><?= htmlspecialchars($park['Hectare']) ?> hectares</div>
+        <!-- Park Cards Container -->
+        <div class="parks-grid">
+            <?php if (mysqli_num_rows($all_parks_result) > 0): ?>
+                <?php while ($park = mysqli_fetch_assoc($all_parks_result)): ?>
+                    
+                    <a href="park-details.php?id=<?= $park['ParkID'] ?>" class="park-card">
+                        <div class="park-image" style="background-image:url('/api/placeholder/300/200')"></div>
+                        <div class="park-info">
+                            <h3><?= htmlspecialchars($park['Name']) ?></h3>
+                            <p><?= htmlspecialchars($park['NeighbourhoodName']) ?></p>
+                            <div class="park-features">
+                                <?php if ($park['Facilities'] == 'Y'): ?>
+                                    <span class="feature">Facilities</span>
+                                <?php endif; ?>
+                                <?php if ($park['Washrooms'] == 'Y'): ?>
+                                    <span class="feature">Washrooms</span>
+                                <?php endif; ?>
+                                <?php if ($park['SpecialFeatures'] == 'Y'): ?>
+                                    <span class="feature">Special Features</span>
+                                <?php endif; ?>
                             </div>
+                            <div class="park-size"><?= htmlspecialchars($park['Hectare']) ?> hectares</div>
                         </div>
-                    <?php endwhile; ?>
-                <?php else: ?>
-                    <p>No parks available at the moment.</p>
-                <?php endif; ?>
-            </div>
+                    </a>
+                <?php endwhile; ?>
+            <?php else: ?>
+                <p>No parks available at the moment.</p>
+            <?php endif; ?>
         </div>
-    </section>
+    </div>
+</section>
 
     <footer id="footer">
         <div class="container">
