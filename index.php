@@ -1,3 +1,16 @@
+<?php
+
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
+// Include authentication system
+require_once("auth_system.php");
+
+// Get current user if logged in
+$current_user = get_current_user_app();
+$is_logged_in = ($current_user !== null);
+$is_guest = is_guest();
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -23,17 +36,18 @@
           <ul class="nav-menu">
               <li><a href="#home">Home</a></li>
               <li><a href="#categories">Browse Spots</a></li>
+              <li><a href="favourites.php" id="favourites-link">Favourites</a></li>
               <li><a href="#footer">Contact</a></li>
               <!-- Auth buttons container -->
               <li class="auth-buttons">
                   <!-- Button shown when logged out -->
-                  <div class="logged-out-buttons">
-                      <a href="auth.html?mode=login" class="btn login-btn">Log In</a>
-                      <a href="auth.html?mode=signup" class="btn signup-btn">Sign Up</a>
+                  <div class="logged-out-buttons" <?php if ($is_logged_in) echo 'style="display: none;"'; ?>>
+                      <a href="auth.php?mode=login" class="btn login-btn">Log In</a>
+                      <a href="auth.php?mode=signup" class="btn signup-btn">Sign Up</a>
                   </div>
                   <!-- Button and indicator shown when logged in -->
-                  <div class="logged-in-buttons" style="display: none;">
-                      <span class="user-greeting">Hello, <span class="username">User</span>!</span>
+                  <div class="logged-in-buttons" <?php if (!$is_logged_in) echo 'style="display: none;"'; ?>>
+                      <span class="user-greeting">Hello, <span class="username"><?php echo $is_logged_in ? htmlspecialchars($current_user['display_name']) : 'User'; ?></span>!</span>
                       <a href="#" class="btn logout-btn">Sign Out</a>
                   </div>
               </li>
@@ -140,36 +154,6 @@
 
   <!-- Toast Notification Container -->
   <div id="toast-container" class="toast-container"></div>
-  
-  <!-- Firebase SDK & Config -->
-  <script type="module">
-    // Import Firebase modules
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-analytics.js";
-    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-
-    // Your Firebase configuration object
-    const firebaseConfig = {
-  apiKey: "AIzaSyDItRW84PjUVkhrrKZwJS8fZJg6NwG_nXc",
-  authDomain: "vanfinds-24006.firebaseapp.com",
-  projectId: "vanfinds-24006",
-  storageBucket: "vanfinds-24006.appspot.com", 
-  messagingSenderId: "946012957250",
-  appId: "1:946012957250:web:366f574d63b3bdd31cdbdb",
-  measurementId: "G-XQ3MD366CB"
-};
-
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
-    const auth = getAuth(app);
-
-    // Expose Firebase Auth functions globally for script.js to use
-    window.firebaseAuth = auth;
-    window.signInWithEmailAndPassword = signInWithEmailAndPassword;
-    window.signOut = signOut;
-    window.onAuthStateChanged = onAuthStateChanged;
-  </script>
   
   <!-- Toast Notification Script -->
   <script>
@@ -303,6 +287,52 @@
     function populateCategories() {
       return;
     }
+    
+    // Check for auth parameter in URL
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const authStatus = urlParams.get('auth');
+      
+      if (authStatus === 'success') {
+        showToast('You have successfully logged in!', 'success', 'Welcome!');
+      } else if (authStatus === 'guest') {
+        showToast('You are browsing as a guest', 'success', 'Guest Access');
+      } else if (authStatus === 'logout') {
+        showToast('You have been logged out', 'success', 'Goodbye!');
+      }
+      
+      // Check if user is logged in
+      const isLoggedIn = <?php echo $is_logged_in ? 'true' : 'false'; ?>;
+      
+      // Add event listener to favourites link
+      const favouritesLink = document.getElementById('favourites-link');
+      if (favouritesLink && !isLoggedIn) {
+        favouritesLink.addEventListener('click', function(e) {
+          e.preventDefault();
+          toast.error('Please log in to view your favourites', 'Access Restricted');
+        });
+      }
+    });
+    
+    // Handle logout button
+    document.addEventListener('DOMContentLoaded', () => {
+      const logoutBtn = document.querySelector('.logout-btn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', async (e) => {
+          e.preventDefault();
+          try {
+            const response = await fetch('auth_system.php?action=logout');
+            const data = await response.json();
+            
+            if (data.success) {
+              window.location.href = 'index.php?auth=logout';
+            }
+          } catch (err) {
+            console.error('Logout error:', err);
+          }
+        });
+      }
+    });
   </script>
 </body>
 </html>

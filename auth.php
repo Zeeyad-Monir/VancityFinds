@@ -64,19 +64,7 @@
     }
     /* Google Button */
     .google-btn {
-      display: block;
-      margin: 0 auto 1.5rem auto;
-      background: #fff;
-      color: #555;
-      border: 1px solid #ddd;
-      padding: 0.6rem 1.2rem;
-      border-radius: 6px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    .google-btn:hover {
-      background: #f2f2f2;
+      display: none; /* Hide Google button as we're removing Firebase */
     }
     .form-group {
       margin-bottom: 1rem;
@@ -313,8 +301,6 @@
         <h2>Login to Your Account</h2>
         <p class="subtitle">See what is going on in Vancouver</p>
         
-        <button class="google-btn" id="google-login-btn">Continue with Google</button>
-        
         <div class="form-group">
           <label for="login-email">Email</label>
           <input type="email" id="login-email" placeholder="Enter your email" />
@@ -329,7 +315,7 @@
         
         <div class="or-divider">or</div>
         
-        <a href="index.php" class="visitor-btn">View as Visitor</a>
+        <button id="guest-login-btn" class="visitor-btn">View as Visitor</button>
         
         <div class="toggle-section">
           Not Registered Yet?
@@ -341,8 +327,6 @@
       <div id="signup-form" class="form-hidden">
         <h2>Create an Account</h2>
         <p class="subtitle">Start for free and enjoy the community</p>
-        
-        <button class="google-btn" id="google-signup-btn">Sign Up with Google</button>
         
         <div class="form-group">
           <label for="signup-email">Email</label>
@@ -361,7 +345,7 @@
         
         <div class="or-divider">or</div>
         
-        <a href="index.php" class="visitor-btn">View as Visitor</a>
+        <button id="guest-signup-btn" class="visitor-btn">View as Visitor</button>
         
         <div class="toggle-section">
           Already have an account?
@@ -374,36 +358,9 @@
   <!-- Toast Notification Container -->
   <div id="toast-container" class="toast-container"></div>
 
-  <!-- Firebase + Auth Logic -->
-  <script type="module">
-    /***** 1) Import Firebase modules *****/
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-    import { 
-      getAuth, 
-      GoogleAuthProvider, 
-      signInWithPopup,
-      signInWithEmailAndPassword, 
-      createUserWithEmailAndPassword,
-      sendPasswordResetEmail
-    } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-
-   // Your Firebase configuration object
-   const firebaseConfig = {
-  apiKey: "AIzaSyDItRW84PjUVkhrrKZwJS8fZJg6NwG_nXc",
-  authDomain: "vanfinds-24006.firebaseapp.com",
-  projectId: "vanfinds-24006",
-  storageBucket: "vanfinds-24006.appspot.com", 
-  messagingSenderId: "946012957250",
-  appId: "1:946012957250:web:366f574d63b3bdd31cdbdb",
-  measurementId: "G-XQ3MD366CB"
-};
-
-    /***** 3) Initialize Firebase *****/
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const googleProvider = new GoogleAuthProvider();
-
-    /***** 4) DOM Elements *****/
+  <!-- Auth Logic -->
+  <script>
+    /***** DOM Elements *****/
     const loginForm = document.getElementById("login-form");
     const signupForm = document.getElementById("signup-form");
     
@@ -420,12 +377,12 @@
     const signupPassword = document.getElementById("signup-password");
     const signupPassword2 = document.getElementById("signup-password2");
     
-    const googleLoginBtn = document.getElementById("google-login-btn");
-    const googleSignupBtn = document.getElementById("google-signup-btn");
+    const guestLoginBtn = document.getElementById("guest-login-btn");
+    const guestSignupBtn = document.getElementById("guest-signup-btn");
     
     const forgotPasswordLink = document.getElementById("forgot-password-link");
 
-    /***** 5) Toggle between Login and Signup forms *****/
+    /***** Toggle between Login and Signup forms *****/
     showSignupLink.addEventListener("click", (e) => {
       e.preventDefault();
       loginForm.classList.add("form-hidden");
@@ -535,7 +492,7 @@
       }
     };
 
-    /***** 6) Email/Password Login *****/
+    /***** Email/Password Login *****/
     loginSubmitBtn.addEventListener("click", async () => {
       const email = loginEmail.value.trim();
       const password = loginPassword.value.trim();
@@ -544,19 +501,37 @@
         showToast("Please fill in all login fields.", "error");
         return;
       }
+      
       try {
-        await signInWithEmailAndPassword(auth, email, password);
-        showToast("Successfully logged in!", "success", "Welcome Back!");
-        // Redirect to your main page after a short delay for the toast to be visible
-        setTimeout(() => {
-          window.location.href = "index.php?auth=success";
-        }, 1500);
+        // Create form data for submission
+        const formData = new FormData();
+        formData.append('email', email);
+        formData.append('password', password);
+        
+        // Send login request to server
+        const response = await fetch('auth_system.php?action=login', {
+          method: 'POST',
+          body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          showToast("Successfully logged in!", "success", "Welcome Back!");
+          // Redirect to main page after a short delay for the toast to be visible
+          setTimeout(() => {
+            window.location.href = "index.php?auth=success";
+          }, 1500);
+        } else {
+          showToast(data.message, "error", "Login Error");
+        }
       } catch (err) {
-        showToast(err.message, "error", "Login Error");
+        showToast("An error occurred during login. Please try again.", "error", "Login Error");
+        console.error(err);
       }
     });
 
-    /***** 7) Email/Password Sign Up *****/
+    /***** Email/Password Sign Up *****/
     signupSubmitBtn.addEventListener("click", async () => {
       const email = signupEmail.value.trim();
       const pass1 = signupPassword.value.trim();
@@ -570,45 +545,70 @@
         showToast("Passwords do not match.", "error");
         return;
       }
+      
       try {
-        await createUserWithEmailAndPassword(auth, email, pass1);
-        showToast("Account created successfully!", "success", "Welcome to Vancity Finds!");
-        // Redirect to your main page after a short delay for the toast to be visible
-        setTimeout(() => {
-          window.location.href = "index.php?auth=success";
-        }, 1500);
+        // Create form data for submission
+        const formData = new FormData();
+        formData.append('email', email);
+        formData.append('password', pass1);
+        formData.append('password2', pass2);
+        
+        // Send registration request to server
+        const response = await fetch('auth_system.php?action=register', {
+          method: 'POST',
+          body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          showToast("Account created successfully!", "success", "Welcome to Vancity Finds!");
+          // Redirect to main page after a short delay for the toast to be visible
+          setTimeout(() => {
+            window.location.href = "index.php?auth=success";
+          }, 1500);
+        } else {
+          showToast(data.message, "error", "Signup Error");
+        }
       } catch (err) {
-        showToast(err.message, "error", "Signup Error");
+        showToast("An error occurred during registration. Please try again.", "error", "Signup Error");
+        console.error(err);
       }
     });
 
-    /***** 8) Google Sign In (both from Login and Signup) *****/
-    const handleGoogleSignIn = async () => {
+    /***** Guest Login *****/
+    const handleGuestLogin = async () => {
       try {
-        await signInWithPopup(auth, googleProvider);
-        showToast("Successfully signed in with Google!", "success", "Welcome!");
-        // Redirect to your main page after a short delay for the toast to be visible
-        setTimeout(() => {
-          window.location.href = "index.php?auth=success";
-        }, 1500);
+        // Send guest login request to server
+        const response = await fetch('auth_system.php?action=guest');
+        const data = await response.json();
+        
+        if (data.success) {
+          showToast("Accessing as guest!", "success", "Welcome!");
+          // Redirect to main page after a short delay for the toast to be visible
+          setTimeout(() => {
+            window.location.href = "index.php?auth=guest";
+          }, 1500);
+        } else {
+          showToast("Failed to access as guest.", "error", "Guest Access Error");
+        }
       } catch (err) {
-        showToast(err.message, "error", "Google Sign-In Error");
+        showToast("An error occurred. Please try again.", "error", "Guest Access Error");
+        console.error(err);
       }
     };
-    googleLoginBtn.addEventListener("click", handleGoogleSignIn);
-    googleSignupBtn.addEventListener("click", handleGoogleSignIn);
+    
+    guestLoginBtn.addEventListener("click", handleGuestLogin);
+    guestSignupBtn.addEventListener("click", handleGuestLogin);
 
-    /***** 9) Forgot Password *****/
+    /***** Forgot Password *****/
     forgotPasswordLink.addEventListener("click", async (e) => {
       e.preventDefault();
       const email = prompt("Enter your email to reset password:");
       if (!email) return;
-      try {
-        await sendPasswordResetEmail(auth, email);
-        showToast("Password reset email sent! Check your inbox.", "success", "Email Sent");
-      } catch (err) {
-        showToast(err.message, "error", "Reset Email Error");
-      }
+      
+      showToast("This feature is not yet implemented in the MySQL version.", "error", "Not Implemented");
+      // In a real implementation, you would send a request to a password reset endpoint
     });
     
     // Check for mode parameter in URL
