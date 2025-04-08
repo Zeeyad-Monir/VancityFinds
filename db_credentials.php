@@ -1,6 +1,6 @@
 <?php
  $dbhost = "localhost";
  $dbuser = "root";
- $dbpass = "";
- $dbname = "spots";
+ $dbpass = "flamer";
+ $dbname = "auth_schema";
 ?>
