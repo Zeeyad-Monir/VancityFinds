@@ -100,10 +100,9 @@ $park = mysqli_fetch_assoc($park_result);
                 <p><strong>Location:</strong> <?= htmlspecialchars($park['StreetNumber']) ?> <?= htmlspecialchars($park['StreetName']) ?>, <?= htmlspecialchars($park['NeighbourhoodName']) ?></p>
                 <p><strong>Area:</strong> <?= htmlspecialchars($park['Hectare']) ?> hectares</p>
 
-                <!-- Park Image Placeholder -->
+                <!-- Park Image -->
                 <div class="park-image">
-                    <!-- You can replace this with an actual image URL if available -->
-                    <img src="path_to_image.jpg" alt="<?= htmlspecialchars($park['Name']) ?>">
+                    <img src="./photos/default-image.jpg" alt="<?= htmlspecialchars($park['Name']) ?>">
                 </div>
             </div>
         </div>
