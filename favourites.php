@@ -8,14 +8,8 @@ $is_logged_in = ($current_user !== null);
 $is_guest = is_guest();
 
 // Check if user has access to this page
-// For parks page, we'll allow all visitors (no authentication required)
-$has_access = true; // Modified to allow all visitors
-
-// If no access, redirect to auth page
-if (!$has_access) {
-    header("Location: auth.php?mode=login");
-    exit;
-}
+// For favourites page, we'll only allow logged-in users
+$has_access = $is_logged_in;
 
 // Establish connection to the database
 require_once("db_credentials.php");
@@ -28,60 +22,28 @@ if (mysqli_connect_errno()) {
 }
 
 // Get user's favorite parks if logged in
-$user_favorites = array();
+$favorite_parks = array();
 if ($is_logged_in) {
     $user_id = $current_user['id'];
-    $favorites_query = "SELECT park_id FROM user_favorites WHERE user_id = ?";
+    $favorites_query = "SELECT p.* FROM parks p 
+                        JOIN user_favorites uf ON p.ParkID = uf.park_id 
+                        WHERE uf.user_id = ?
+                        ORDER BY p.Name";
     $favorites_stmt = mysqli_prepare($connection, $favorites_query);
     mysqli_stmt_bind_param($favorites_stmt, "i", $user_id);
     mysqli_stmt_execute($favorites_stmt);
     $favorites_result = mysqli_stmt_get_result($favorites_stmt);
     
-    while ($row = mysqli_fetch_assoc($favorites_result)) {
-        $user_favorites[] = $row['park_id'];
+    // Fetch all favorite parks
+    while ($park = mysqli_fetch_assoc($favorites_result)) {
+        $favorite_parks[] = $park;
     }
     
     mysqli_stmt_close($favorites_stmt);
 }
 
-// Fetch filter options for Neighborhood, Facilities, and Washrooms
-$neighborhood_query = "SELECT DISTINCT NeighbourhoodName FROM parks ORDER BY NeighbourhoodName";
-$facilities_query = "SELECT DISTINCT Facilities FROM parks";
-$washrooms_query = "SELECT DISTINCT Washrooms FROM parks";
-
-$neighborhood_result = mysqli_query($connection, $neighborhood_query);
-$facilities_result = mysqli_query($connection, $facilities_query);
-$washrooms_result = mysqli_query($connection, $washrooms_query);
-
-// Query to fetch all parks with filters
-$where_clauses = [];
-if (isset($_GET['neighborhood']) && $_GET['neighborhood'] != '') {
-    $neighborhood = mysqli_real_escape_string($connection, $_GET['neighborhood']);
-    $where_clauses[] = "NeighbourhoodName = '$neighborhood'";
-}
-if (isset($_GET['facilities']) && $_GET['facilities'] != '') {
-    $facilities = mysqli_real_escape_string($connection, $_GET['facilities']);
-    $where_clauses[] = "Facilities = '$facilities'";
-}
-if (isset($_GET['washrooms']) && $_GET['washrooms'] != '') {
-    $washrooms = mysqli_real_escape_string($connection, $_GET['washrooms']);
-    $where_clauses[] = "Washrooms = '$washrooms'";
-}
-
-$where_sql = '';
-if (count($where_clauses) > 0) {
-    $where_sql = 'WHERE ' . implode(' AND ', $where_clauses);
-}
-
-// Query to fetch parks with the applied filters
-$select_all_parks_query = "SELECT * FROM parks $where_sql";
-$all_parks_result = mysqli_query($connection, $select_all_parks_query);
-
-// Check for query errors
-if (!$all_parks_result) {
-    echo "Error with database query: " . mysqli_error($connection);
-    exit();
-}
+// If user is not logged in, we'll redirect them after showing a toast message
+// The redirection will be handled by JavaScript
 ?>
 
 <!DOCTYPE html>
@@ -89,9 +51,63 @@ if (!$all_parks_result) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vancity Finds - Parks</title>
+    <title>Vancity Finds - Favourites</title>
     <link rel="stylesheet" href="styles.css">
     <style>
+        /* Additional styles for the favourites page */
+        .favourites-section {
+            padding-top: calc(var(--spacing-lg) * 1.5);
+            padding-bottom: calc(var(--spacing-lg) * 1.5);
+            margin-top: 60px;
+        }
+        
+        .favourites-title {
+            position: relative;
+            padding-bottom: 10px;
+            text-align: center;
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .favourites-title::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            bottom: 0;
+            height: 3px;
+            width: 130px;
+            background: linear-gradient(90deg, var(--secondary-color), var(--primary-color), var(--secondary-color));
+            background-size: 200% auto;
+            animation: gradientAnimation 3s linear infinite;
+            border-radius: 2px;
+            transform: translateX(-50%);
+        }
+        
+        .favourites-description {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto var(--spacing-lg);
+        }
+        
+        .empty-favourites {
+            text-align: center;
+            padding: var(--spacing-lg);
+            background-color: #f8f9fa;
+            border-radius: var(--border-radius);
+            margin: var(--spacing-md) auto;
+            max-width: 600px;
+        }
+        
+        .empty-favourites p {
+            margin-bottom: var(--spacing-md);
+            color: var(--dark-color);
+            font-size: 1.1rem;
+        }
+        
+        .empty-favourites .btn {
+            display: inline-block;
+            margin-top: var(--spacing-sm);
+        }
+        
         /* Heart icon styles */
         .park-header {
             display: flex;
@@ -146,8 +162,8 @@ if (!$all_parks_result) {
             <a href="index.php" class="logo">Vancity Finds</a>
             <ul class="nav-menu">
                 <li><a href="index.php">Home</a></li>
-                <li><a href="#categories">Browse Spots</a></li>
-                <li><a href="favourites.php" id="favourites-link">Favourites</a></li>
+                <li><a href="parks.php">Parks</a></li>
+                <li><a href="favourites.php" class="active">Favourites</a></li>
                 <li><a href="#footer">Contact</a></li>
                 <!-- Auth buttons container -->
                 <li class="auth-buttons">
@@ -166,82 +182,61 @@ if (!$all_parks_result) {
         </div>
     </header>
 
-    <!-- Filter Section -->
-    <section class="filters-section">
+    <!-- Favourites Section -->
+    <section class="favourites-section" id="favourites">
         <div class="container">
-            <form method="GET" action="parks.php">
-                <div class="filter-group">
-                    <label for="neighborhood">Neighborhood:</label>
-                    <select name="neighborhood" id="neighborhood">
-                        <option value="">Select Neighborhood</option>
-                        <?php while ($neighborhood = mysqli_fetch_assoc($neighborhood_result)): ?>
-                            <option value="<?= htmlspecialchars($neighborhood['NeighbourhoodName']) ?>" <?= (isset($_GET['neighborhood']) && $_GET['neighborhood'] == $neighborhood['NeighbourhoodName']) ? 'selected' : '' ?>><?= htmlspecialchars($neighborhood['NeighbourhoodName']) ?></option>
-                        <?php endwhile; ?>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label for="facilities">Facilities:</label>
-                    <select name="facilities" id="facilities">
-                        <option value="">Select Facilities</option>
-                        <option value="Y" <?= (isset($_GET['facilities']) && $_GET['facilities'] == 'Y') ? 'selected' : '' ?>>Available</option>
-                        <option value="N" <?= (isset($_GET['facilities']) && $_GET['facilities'] == 'N') ? 'selected' : '' ?>>Not Available</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label for="washrooms">Washrooms:</label>
-                    <select name="washrooms" id="washrooms">
-                        <option value="">Select Washrooms</option>
-                        <option value="Y" <?= (isset($_GET['washrooms']) && $_GET['washrooms'] == 'Y') ? 'selected' : '' ?>>Available</option>
-                        <option value="N" <?= (isset($_GET['washrooms']) && $_GET['washrooms'] == 'N') ? 'selected' : '' ?>>Not Available</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn">Apply Filters</button>
-            </form>
-        </div>
-    </section>
+            <h2 class="favourites-title">My Favourite Parks</h2>
+            <p class="favourites-description">View all your saved park spots in one place. Add parks to your favourites while browsing to keep track of places you want to visit.</p>
 
-
-    <!-- Parks Grid Section -->
-    <section class="parks-section" id="all-parks">
-        <div class="container">
-            <h2 class="parks-title">All Parks</h2>
-            <p class="parks-description">Explore all parks in Vancouver, from large green spaces to small neighborhood parks.</p>
-
-            <!-- Park Cards Container -->
-            <div class="parks-grid">
-                <?php if (mysqli_num_rows($all_parks_result) > 0): ?>
-                    <?php while ($park = mysqli_fetch_assoc($all_parks_result)): ?>
-                        <div class="park-card">
-                            <div class="park-image" style="background-image:url('/api/placeholder/300/200')"></div>
-                            <div class="park-info">
-                                <div class="park-header">
-                                    <h3><?= htmlspecialchars($park['Name']) ?></h3>
-                                    <div class="heart-icon <?= in_array($park['ParkID'], $user_favorites) ? 'active' : '' ?>" data-park-id="<?= $park['ParkID'] ?>">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                                        </svg>
+            <?php if ($has_access): ?>
+                <!-- Display favourites if user is logged in -->
+                <div class="parks-grid">
+                    <?php if (count($favorite_parks) > 0): ?>
+                        <?php foreach ($favorite_parks as $park): ?>
+                            <div class="park-card">
+                                <div class="park-image" style="background-image:url('/api/placeholder/300/200')"></div>
+                                <div class="park-info">
+                                    <div class="park-header">
+                                        <h3><?= htmlspecialchars($park['Name']) ?></h3>
+                                        <div class="heart-icon active" data-park-id="<?= $park['ParkID'] ?>">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                            </svg>
+                                        </div>
                                     </div>
+                                    <p><?= htmlspecialchars($park['NeighbourhoodName']) ?></p>
+                                    <div class="park-features">
+                                        <?php if ($park['Facilities'] == 'Y'): ?>
+                                            <span class="feature">Facilities</span>
+                                        <?php endif; ?>
+                                        <?php if ($park['Washrooms'] == 'Y'): ?>
+                                            <span class="feature">Washrooms</span>
+                                        <?php endif; ?>
+                                        <?php if ($park['SpecialFeatures'] == 'Y'): ?>
+                                            <span class="feature">Special Features</span>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="park-size"><?= htmlspecialchars($park['Hectare']) ?> hectares</div>
                                 </div>
-                                <p><?= htmlspecialchars($park['NeighbourhoodName']) ?></p>
-                                <div class="park-features">
-                                    <?php if ($park['Facilities'] == 'Y'): ?>
-                                        <span class="feature">Facilities</span>
-                                    <?php endif; ?>
-                                    <?php if ($park['Washrooms'] == 'Y'): ?>
-                                        <span class="feature">Washrooms</span>
-                                    <?php endif; ?>
-                                    <?php if ($park['SpecialFeatures'] == 'Y'): ?>
-                                        <span class="feature">Special Features</span>
-                                    <?php endif; ?>
-                                </div>
-                                <div class="park-size"><?= htmlspecialchars($park['Hectare']) ?> hectares</div>
                             </div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <!-- Show empty state if no favorites -->
+                        <div class="empty-favourites">
+                            <p>You haven't added any parks to your favourites yet.</p>
+                            <p>Browse our parks collection and click the heart icon to add parks to your favourites.</p>
+                            <a href="parks.php" class="btn">Browse Parks</a>
                         </div>
-                    <?php endwhile; ?>
-                <?php else: ?>
-                    <p>No parks available at the moment.</p>
-                <?php endif; ?>
-            </div>
+                    <?php endif; ?>
+                </div>
+            <?php else: ?>
+                <!-- This section won't be visible as non-logged in users will be redirected -->
+                <!-- But we'll include it as a fallback -->
+                <div class="empty-favourites">
+                    <p>Please log in to view and manage your favourite parks.</p>
+                    <a href="auth.php?mode=login" class="btn">Log In</a>
+                </div>
+            <?php endif; ?>
         </div>
     </section>
 
@@ -254,6 +249,16 @@ if (!$all_parks_result) {
                     <p>Phone: (604) 555-1234</p>
                     <p>123 Vancouver Street, Vancouver, BC</p>
                 </div>
+                
+                <div class="social-icons">
+                    <a href="#">FB</a>
+                    <a href="#">IG</a>
+                    <a href="#">TW</a>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>&copy; 2025 Vancity Finds. All rights reserved.</p>
             </div>
         </div>
     </footer>
@@ -325,16 +330,19 @@ if (!$all_parks_result) {
         }, 10);
         
         // Auto dismiss
-        setTimeout(() => {
+        this.autoClose = setTimeout(() => {
           this.dismiss(toast);
         }, duration);
       }
-
+      
       dismiss(toast) {
-        toast.classList.add('hide');
+        // Remove show class to trigger hide animation
+        toast.classList.remove('show');
+        
+        // Remove from DOM after animation completes
         setTimeout(() => {
           if (toast.parentNode) {
-            this.container.removeChild(toast);
+            toast.parentNode.removeChild(toast);
           }
         }, 300);
       }
@@ -354,25 +362,22 @@ if (!$all_parks_result) {
     // Check if user is logged in
     const isLoggedIn = <?php echo $is_logged_in ? 'true' : 'false'; ?>;
     
-    // Add event listener to favourites link
-    document.addEventListener('DOMContentLoaded', function() {
-      const favouritesLink = document.getElementById('favourites-link');
-      if (favouritesLink && !isLoggedIn) {
-        favouritesLink.addEventListener('click', function(e) {
-          e.preventDefault();
-          toast.error('Please log in to view your favourites', 'Access Restricted');
-        });
-      }
+    // If not logged in, show toast and redirect
+    if (!isLoggedIn) {
+      // Show toast message
+      toast.error('Please log in to view your favourites', 'Access Restricted');
       
-      // Add event listeners to heart icons
+      // Redirect to home page after a short delay
+      setTimeout(() => {
+        window.location.href = 'index.php';
+      }, 3000);
+    }
+
+    // Add event listeners to heart icons
+    document.addEventListener('DOMContentLoaded', function() {
       const heartIcons = document.querySelectorAll('.heart-icon');
       heartIcons.forEach(icon => {
         icon.addEventListener('click', function() {
-          if (!isLoggedIn) {
-            toast.error('Please log in to add parks to your favourites', 'Login Required');
-            return;
-          }
-          
           const parkId = this.getAttribute('data-park-id');
           toggleFavorite(parkId, this);
         });
@@ -399,7 +404,30 @@ if (!$all_parks_result) {
               heartIcon.classList.add('active');
               toast.success('Park added to your favourites');
             } else {
-              heartIcon.classList.remove('active');
+              // If we're on the favourites page, remove the park card
+              const parkCard = heartIcon.closest('.park-card');
+              if (window.location.pathname.includes('favourites.php')) {
+                parkCard.style.opacity = '0';
+                setTimeout(() => {
+                  parkCard.remove();
+                  
+                  // Check if there are any parks left
+                  const remainingCards = document.querySelectorAll('.park-card');
+                  if (remainingCards.length === 0) {
+                    // Show empty state if no parks left
+                    const parksGrid = document.querySelector('.parks-grid');
+                    parksGrid.innerHTML = `
+                      <div class="empty-favourites">
+                        <p>You haven't added any parks to your favourites yet.</p>
+                        <p>Browse our parks collection and click the heart icon to add parks to your favourites.</p>
+                        <a href="parks.php" class="btn">Browse Parks</a>
+                      </div>
+                    `;
+                  }
+                }, 300);
+              } else {
+                heartIcon.classList.remove('active');
+              }
               toast.success('Park removed from your favourites');
             }
           } else {

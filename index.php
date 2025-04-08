@@ -36,6 +36,7 @@ $is_guest = is_guest();
           <ul class="nav-menu">
               <li><a href="#home">Home</a></li>
               <li><a href="#categories">Browse Spots</a></li>
+              <li><a href="favourites.php" id="favourites-link">Favourites</a></li>
               <li><a href="#footer">Contact</a></li>
               <!-- Auth buttons container -->
               <li class="auth-buttons">
@@ -298,6 +299,18 @@ $is_guest = is_guest();
         showToast('You are browsing as a guest', 'success', 'Guest Access');
       } else if (authStatus === 'logout') {
         showToast('You have been logged out', 'success', 'Goodbye!');
+      }
+      
+      // Check if user is logged in
+      const isLoggedIn = <?php echo $is_logged_in ? 'true' : 'false'; ?>;
+      
+      // Add event listener to favourites link
+      const favouritesLink = document.getElementById('favourites-link');
+      if (favouritesLink && !isLoggedIn) {
+        favouritesLink.addEventListener('click', function(e) {
+          e.preventDefault();
+          toast.error('Please log in to view your favourites', 'Access Restricted');
+        });
       }
     });
     

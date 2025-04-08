@@ -26,25 +26,16 @@ function get_db_connection() {
  * @return array|null User information or null if not logged in
  */
 function get_current_user_app() {
-    if (isset($_SESSION['user_id'])) {
-        $connection = get_db_connection();
-        
-        $stmt = mysqli_prepare($connection, "SELECT id, email, display_name FROM users WHERE id = ?");
-        mysqli_stmt_bind_param($stmt, "i", $_SESSION['user_id']);
-        mysqli_stmt_execute($stmt);
-        $result = mysqli_stmt_get_result($stmt);
-        
-        if ($user = mysqli_fetch_assoc($result)) {
-            mysqli_stmt_close($stmt);
-            mysqli_close($connection);
-            return $user;
-        }
-        
-        mysqli_stmt_close($stmt);
-        mysqli_close($connection);
+    if (!isset($_SESSION['user_id'])) {
+        return null;
     }
     
-    return null;
+    // Return session data directly without database query
+    return [
+        'id' => $_SESSION['user_id'],
+        'email' => $_SESSION['email'],
+        'display_name' => $_SESSION['display_name']
+    ];
 }
 
 /**
