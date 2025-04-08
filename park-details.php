@@ -16,7 +16,7 @@ $parkID = isset($_GET['id']) ? $_GET['id'] : '';
 
 // If parkID is not set or invalid, redirect to parks page
 if (empty($parkID) || !is_numeric($parkID)) {
-    header("Location: parks.php");
+    header("Location: parks.php"); // Redirect to the parks listing page
     exit();
 }
 
@@ -54,29 +54,18 @@ $park = mysqli_fetch_assoc($park_result);
         <div class="container">
             <div class="park-details">
                 <h1><?= htmlspecialchars($park['Name']) ?></h1>
-                <p><strong>Neighborhood:</strong> <?= htmlspecialchars($park['NeighbourhoodName']) ?></p>
-                <p><strong>Size:</strong> <?= htmlspecialchars($park['Hectare']) ?> hectares</p>
-                
-                <div class="park-features">
-                    <p><strong>Features:</strong></p>
-                    <?php if ($park['Facilities'] == 'Y'): ?>
-                        <p>Facilities Available</p>
-                    <?php endif; ?>
-                    <?php if ($park['Washrooms'] == 'Y'): ?>
-                        <p>Washrooms Available</p>
-                    <?php endif; ?>
-                    <?php if ($park['SpecialFeatures'] == 'Y'): ?>
-                        <p>Special Features Available</p>
-                    <?php endif; ?>
-                </div>
+                <p><strong>Official Name:</strong> <?= $park['Official'] == 1 ? 'Yes' : 'No' ?></p>
+                <p><strong>Advisories:</strong> <?= htmlspecialchars($park['Advisories']) ?: 'N/A' ?></p>
+                <p><strong>Special Features:</strong> <?= htmlspecialchars($park['SpecialFeatures']) == 'Y' ? 'Yes' : 'No' ?></p>
+                <p><strong>Facilities Available:</strong> <?= htmlspecialchars($park['Facilities']) == 'Y' ? 'Yes' : 'No' ?></p>
+                <p><strong>Washrooms Available:</strong> <?= htmlspecialchars($park['Washrooms']) == 'Y' ? 'Yes' : 'No' ?></p>
+                <p><strong>Location:</strong> <?= htmlspecialchars($park['StreetNumber']) ?> <?= htmlspecialchars($park['StreetName']) ?>, <?= htmlspecialchars($park['NeighbourhoodName']) ?></p>
+                <p><strong>Area:</strong> <?= htmlspecialchars($park['Hectare']) ?> hectares</p>
 
-                <div class="park-description">
-                    <p><strong>Description:</strong></p>
-                    <p><?= htmlspecialchars($park['Description']) ?></p>
-                </div>
-
+                <!-- Park Image Placeholder -->
                 <div class="park-image">
-                    <img src="<?= htmlspecialchars($park['ImageURL']) ?>" alt="<?= htmlspecialchars($park['Name']) ?>">
+                    <!-- You can replace this with an actual image URL if available -->
+                    <img src="path_to_image.jpg" alt="<?= htmlspecialchars($park['Name']) ?>">
                 </div>
             </div>
         </div>
