@@ -255,9 +255,33 @@ if (!$all_parks_result) {
     <!-- Parks Grid Section -->
     <section class="parks-section" id="all-parks">
         <div class="container">
-            <h2 class="parks-title">All Parks</h2>
-            <p class="parks-description">Explore all parks in Vancouver, from large green spaces to small neighborhood parks.</p>
-
+            <!-- Dynamically change the title and description based on the category -->
+            <h2 class="parks-title">
+                <?php 
+                    if ($category == 'small') {
+                        echo 'Small Parks';
+                    } elseif ($category == 'medium') {
+                        echo 'Medium Parks';
+                    } elseif ($category == 'large') {
+                        echo 'Large Parks';
+                    } else {
+                        echo 'All Parks';
+                    }
+                ?>
+            </h2>
+            <p class="parks-description">
+                <?php 
+                    if ($category == 'small') {
+                        echo 'Explore small parks with an area of less than 2 hectares in Vancouver.';
+                    } elseif ($category == 'medium') {
+                        echo 'Explore medium-sized parks with an area ranging from 2 to 5 hectares in Vancouver.';
+                    } elseif ($category == 'large') {
+                        echo 'Explore large parks with an area greater than 5 hectares in Vancouver.';
+                    } else {
+                        echo 'Explore all parks in Vancouver, from large green spaces to small neighborhood parks.';
+                    }
+                ?>
+            </p>
             <!-- Park Cards Container -->
             <div class="parks-grid">
                 <?php if (mysqli_num_rows($all_parks_result) > 0): ?>
