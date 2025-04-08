@@ -8,8 +8,8 @@ $is_logged_in = ($current_user !== null);
 $is_guest = is_guest();
 
 // Check if user has access to this page
-// For parks page, we'll allow both logged in users and guests
-$has_access = $is_logged_in || $is_guest;
+// For parks page, we'll allow all visitors (no authentication required)
+$has_access = true; // Modified to allow all visitors
 
 // If no access, redirect to auth page
 if (!$has_access) {
@@ -252,78 +252,60 @@ if (!$all_parks_result) {
         }, 10);
         
         // Auto dismiss
-        this.autoClose = setTimeout(() => {
+        setTimeout(() => {
           this.dismiss(toast);
         }, duration);
       }
-      
+
       dismiss(toast) {
-        // Remove show class to trigger hide animation
-        toast.classList.remove('show');
-        
-        // Remove from DOM after animation completes
+        toast.classList.add('hide');
         setTimeout(() => {
-          if (toast.parentNode) {
-            toast.parentNode.removeChild(toast);
-          }
+          this.container.removeChild(toast);
         }, 300);
-      }
-      
-      success(message, title = 'Success!') {
-        this.show({ title, message, type: 'success' });
-      }
-      
-      error(message, title = 'Error') {
-        this.show({ title, message, type: 'error' });
       }
     }
 
     // Initialize toast notification system
     const toast = new ToastNotification();
 
-    // Replace alert with toast
-    window.showToast = (message, type = 'success', title) => {
-      if (type === 'success') {
-        toast.success(message, title);
-      } else if (type === 'error') {
-        toast.error(message, title);
-      }
-    };
-    </script>
-
-    <script src="script.js"></script>
-    
-    <!-- Handle logout button -->
-    <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    // Logout functionality
+    document.addEventListener('DOMContentLoaded', function() {
       const logoutBtn = document.querySelector('.logout-btn');
       if (logoutBtn) {
-        logoutBtn.addEventListener('click', async (e) => {
+        logoutBtn.addEventListener('click', function(e) {
           e.preventDefault();
-          try {
-            const response = await fetch('auth_system.php?action=logout');
-            const data = await response.json();
-            
+          
+          // Send logout request
+          fetch('auth_system.php?action=logout', {
+            method: 'POST'
+          })
+          .then(response => response.json())
+          .then(data => {
             if (data.success) {
-              window.location.href = 'index.php?auth=logout';
+              // Show success toast
+              toast.show({
+                title: 'Logged Out',
+                message: 'You have been successfully logged out.',
+                type: 'success'
+              });
+              
+              // Redirect to home page after a short delay
+              setTimeout(() => {
+                window.location.href = 'index.php?logout=success';
+              }, 1500);
             }
-          } catch (err) {
-            console.error('Logout error:', err);
-          }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            toast.show({
+              title: 'Error',
+              message: 'An error occurred while logging out.',
+              type: 'error'
+            });
+          });
         });
       }
     });
     </script>
 </body>
 </html>
-
-<?php
-// Free the result set
-mysqli_free_result($all_parks_result);
-mysqli_free_result($neighborhood_result);
-mysqli_free_result($facilities_result);
-mysqli_free_result($washrooms_result);
-
-// Close the connection
-mysqli_close($connection);
-?>
