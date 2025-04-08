@@ -1,6 +1,8 @@
 <?php
 // Include authentication system
 require_once("auth_system.php");
+// Include park image API
+require_once("park_image_api.php");
 
 // Get current user if logged in
 $current_user = get_current_user_app();
@@ -296,7 +298,7 @@ if (!$all_parks_result) {
                             
                             <!-- Park Card with Link to Details -->
                             <a href="park-details.php?id=<?= $park['ParkID'] ?>" class="park-card">
-                                <div class="park-image" style="background-image:url('/api/placeholder/300/200')"></div>
+                                <div class="park-image" style="background-image:url('<?php echo get_park_image($park['Name'], $park['NeighbourhoodName']); ?>')"></div>
                                 <div class="park-info">
                                     <h3><?= htmlspecialchars($park['Name']) ?></h3>
                                     <p><?= htmlspecialchars($park['NeighbourhoodName']) ?></p>
