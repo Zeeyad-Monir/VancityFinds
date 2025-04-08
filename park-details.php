@@ -1,4 +1,23 @@
 <?php
+
+// Include authentication system
+require_once("auth_system.php");
+
+// Get current user if logged in
+$current_user = get_current_user_app();
+$is_logged_in = ($current_user !== null);
+$is_guest = is_guest();
+
+// Check if user has access to this page
+// For parks page, we'll allow all visitors (no authentication required)
+$has_access = true; // Modified to allow all visitors
+
+// If no access, redirect to auth page
+if (!$has_access) {
+    header("Location: auth.php?mode=login");
+    exit;
+}
+
 // Include database credentials
 require("db_credentials.php");
 
@@ -45,10 +64,29 @@ $park = mysqli_fetch_assoc($park_result);
 </head>
 <body>
     <header>
-        <div class="container header-container">
-            <a href="index.php" class="logo">Vancity Finds</a>
-        </div>
-    </header>
+            <div class="container header-container">
+                <a href="index.php" class="logo">Vancity Finds</a>
+                <ul class="nav-menu">
+                    <li><a href="index.php">Home</a></li>
+                    <li><a href="#categories">Browse Spots</a></li>
+                    <li><a href="favourites.php" id="favourites-link">Favourites</a></li>
+                    <li><a href="#footer">Contact</a></li>
+                    <!-- Auth buttons container -->
+                    <li class="auth-buttons">
+                        <!-- Button shown when logged out -->
+                        <div class="logged-out-buttons" <?php if ($is_logged_in) echo 'style="display: none;"'; ?>>
+                            <a href="auth.php?mode=login" class="btn login-btn">Log In</a>
+                            <a href="auth.php?mode=signup" class="btn signup-btn">Sign Up</a>
+                        </div>
+                        <!-- Button and indicator shown when logged in -->
+                        <div class="logged-in-buttons" <?php if (!$is_logged_in) echo 'style="display: none;"'; ?>>
+                            <span class="user-greeting">Hello, <span class="username"><?php echo $is_logged_in ? htmlspecialchars($current_user['display_name']) : 'User'; ?></span>!</span>
+                            <a href="#" class="btn logout-btn">Sign Out</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </header>
 
     <section class="park-details-section">
         <div class="container">

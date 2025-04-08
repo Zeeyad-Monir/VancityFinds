@@ -242,39 +242,57 @@ button[type="submit"]:hover {
   padding: 0 var(--spacing-md);
 }
 
-.park-card {
-  background-color: #f9f9f9;
+/* Park Card Image Styling */
+.park-card-container {
+  position: relative;
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  background-color: #f9f9f9; /* Light grey background for card */
   border-radius: var(--border-radius);
   overflow: hidden;
   box-shadow: var(--box-shadow);
   transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+  display: flex;
+  flex-direction: column; /* Stacking the image and content vertically */
 }
 
+/* Park Image */
 .park-image {
-  height: 200px;
-  background-size: cover;
-  background-position: center;
+  width: 100%; /* Ensure the image fills the width of the card */
+  height: 200px; /* Fixed height for the image */
+  object-fit: cover; /* Ensure the image fills the area without distortion */
+  border-bottom: 2px solid #e2e8f0; /* Border between the image and content */
 }
 
+/* Park Info */
 .park-info {
+  background-color: #ffffff; /* White background for content */
   padding: var(--spacing-sm);
+  flex: 1; /* Ensures that the content takes the remaining space */
+  z-index: 1; /* Keeps the content above the image */
+  position: relative;
 }
 
+/* Title of the park */
 .park-info h3 {
   font-size: 1.2rem;
   font-weight: bold;
   margin-bottom: var(--spacing-xs);
 }
 
+/* Paragraph text styling */
 .park-info p {
   color: #777;
   margin-bottom: var(--spacing-sm);
 }
 
+/* Features section inside the park info */
 .park-features {
   margin-top: var(--spacing-xs);
 }
 
+/* Feature tags (Facilities, Washrooms, etc.) */
 .feature {
   display: inline-block;
   margin-right: 5px;
@@ -285,10 +303,30 @@ button[type="submit"]:hover {
   font-size: 0.8rem;
 }
 
+/* Park size text styling */
 .park-size {
   margin-top: 10px;
   font-size: 1rem;
   color: #333;
+}
+
+/* Parks Grid Layout */
+.parks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Auto adjust columns */
+  gap: var(--spacing-md);
+  padding: 0 var(--spacing-md);
+}
+
+/* Hover effect for park cards */
+.park-card-container:hover {
+  transform: scale(1.05); /* Slight zoom on hover */
+  box-shadow: var(--box-shadow-hover); /* Enhanced shadow on hover */
+}
+/* Park Details Page */
+
+.park-details {
+  margin-top: var(--spacing-md);
 }
 
 /* Footer Styles */

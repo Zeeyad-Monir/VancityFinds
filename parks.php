@@ -105,6 +105,11 @@ if (!$all_parks_result) {
     echo "Error with database query: " . mysqli_error($connection);
     exit();
 }
+
+// Google Custom Search API Integration for park images
+$google_api_key = 'AIzaSyAxiNMGiHju-pnUEtYGDluBQlRfTZXhrZc';  
+$search_engine_id = '1479f15fc18ec497a'; 
+
 ?>
 
 <!DOCTYPE html>
@@ -286,6 +291,29 @@ if (!$all_parks_result) {
             <div class="parks-grid">
                 <?php if (mysqli_num_rows($all_parks_result) > 0): ?>
                     <?php while ($park = mysqli_fetch_assoc($all_parks_result)): ?>
+                        <?php
+                        // Google Custom Search API Integration for park images
+                        $query = urlencode($park['Name']);  // Search query (park name)
+                        $google_search_url = "https://www.googleapis.com/customsearch/v1?q=$query&key=$google_api_key&cx=$search_engine_id&searchType=image&num=1";
+
+                        // Use curl to fetch image data from Google Custom Search API
+                        $ch = curl_init();
+                        curl_setopt($ch, CURLOPT_URL, $google_search_url);
+                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                        $response = curl_exec($ch);
+                        curl_close($ch);
+
+                        // Decode the JSON response
+                        $images = json_decode($response, true);
+                        $image_url = '';
+
+                        // Check if images are found and set the image URL
+                        if (isset($images['items'][0]['link'])) {
+                            $image_url = $images['items'][0]['link'];
+                        } else {
+                            $image_url = './photos/default-image.jpg';  // Fallback to default image if none found
+                        }
+                        ?>
                         <div class="park-card-container">
                             <!-- Heart icon for favorites -->
                             <div class="heart-icon <?= in_array($park['ParkID'], $user_favorites) ? 'active' : '' ?>" data-park-id="<?= $park['ParkID'] ?>">
@@ -296,7 +324,11 @@ if (!$all_parks_result) {
                             
                             <!-- Park Card with Link to Details -->
                             <a href="park-details.php?id=<?= $park['ParkID'] ?>" class="park-card">
-                                <div class="park-image" style="background-image:url('/api/placeholder/300/200')"></div>
+                                <!-- Park Image -->
+                                <div class="park-image">
+                                    <img src="<?= $image_url ? $image_url : 'default-image.jpg' ?>" alt="<?= htmlspecialchars($park['Name']) ?>">
+                                </div>
+
                                 <div class="park-info">
                                     <h3><?= htmlspecialchars($park['Name']) ?></h3>
                                     <p><?= htmlspecialchars($park['NeighbourhoodName']) ?></p>

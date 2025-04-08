@@ -1,6 +1,6 @@
 <?php
  $dbhost = "localhost";
  $dbuser = "root";
- $dbpass = "flamer";
- $dbname = "VancityFinds";
+ $dbpass = "";
+ $dbname = "vancity_db2";
 ?>
