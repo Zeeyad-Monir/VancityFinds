@@ -128,6 +128,8 @@ if (!$all_parks_result) {
             width: 24px;
             height: 24px;
             transition: all 0.3s ease;
+            z-index: 10;
+            position: relative;
         }
         
         .heart-icon svg {
@@ -161,6 +163,21 @@ if (!$all_parks_result) {
         .heart-pulse {
             animation: heartPulse 0.3s ease;
         }
+        
+        /* Make park card clickable but allow heart icon to be clicked separately */
+        .park-card {
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .park-card-link {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+        }
     </style>
 </head>
 <body>
@@ -192,8 +209,9 @@ if (!$all_parks_result) {
     <!-- Filter Section -->
     <section class="filters-section">
         <div class="container">
-            <form id="filter-form">
-            <input type="hidden" name="category" value="<?= isset($_GET['category']) ? htmlspecialchars($_GET['category']) : 'all' ?>">
+            <form id="filter-form" method="GET" action="parks.php">
+                <input type="hidden" name="category" value="<?= isset($_GET['category']) ? htmlspecialchars($_GET['category']) : 'all' ?>">
+                
                 <!-- Search Bar -->
                 <div class="filter-group search-bar">
                     <input type="text" placeholder="Type a name..." name="search" id="search" value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
@@ -233,68 +251,52 @@ if (!$all_parks_result) {
         </div>
     </section>
 
-
     <!-- Parks Grid Section -->
     <section class="parks-section" id="all-parks">
-    <div class="container">
-        <!-- Dynamically change the title and description based on the category -->
-        <h2 class="parks-title">
-            <?php 
-                if ($category == 'small') {
-                    echo 'Small Parks';
-                } elseif ($category == 'medium') {
-                    echo 'Medium Parks';
-                } elseif ($category == 'large') {
-                    echo 'Large Parks';
-                } else {
-                    echo 'All Parks';
-                }
-            ?>
-        </h2>
-        <p class="parks-description">
-            <?php 
-                if ($category == 'small') {
-                    echo 'Explore small parks with an area of less than 2 hectares in Vancouver.';
-                } elseif ($category == 'medium') {
-                    echo 'Explore medium-sized parks with an area ranging from 2 to 5 hectares in Vancouver.';
-                } elseif ($category == 'large') {
-                    echo 'Explore large parks with an area greater than 5 hectares in Vancouver.';
-                } else {
-                    echo 'Explore all parks in Vancouver, from large green spaces to small neighborhood parks.';
-                }
-            ?>
-        </p>
-        <!-- Park Cards Container -->
-        <div class="parks-grid">
-            <?php if (mysqli_num_rows($all_parks_result) > 0): ?>
-                <?php while ($park = mysqli_fetch_assoc($all_parks_result)): ?>
-                    
-                    <a href="park-details.php?id=<?= $park['ParkID'] ?>" class="park-card">
-                        <div class="park-image" style="background-image:url('/api/placeholder/300/200')"></div>
-                        <div class="park-info">
-                            <h3><?= htmlspecialchars($park['Name']) ?></h3>
-                            <p><?= htmlspecialchars($park['NeighbourhoodName']) ?></p>
-                            <div class="park-features">
-                                <?php if ($park['Facilities'] == 'Y'): ?>
-                                    <span class="feature">Facilities</span>
-                                <?php endif; ?>
-                                <?php if ($park['Washrooms'] == 'Y'): ?>
-                                    <span class="feature">Washrooms</span>
-                                <?php endif; ?>
-                                <?php if ($park['SpecialFeatures'] == 'Y'): ?>
-                                    <span class="feature">Special Features</span>
-                                <?php endif; ?>
+        <div class="container">
+            <h2 class="parks-title">All Parks</h2>
+            <p class="parks-description">Explore all parks in Vancouver, from large green spaces to small neighborhood parks.</p>
+
+            <!-- Park Cards Container -->
+            <div class="parks-grid">
+                <?php if (mysqli_num_rows($all_parks_result) > 0): ?>
+                    <?php while ($park = mysqli_fetch_assoc($all_parks_result)): ?>
+                        <div class="park-card">
+                            <!-- Clickable link for the entire card -->
+                            <a href="park-details.php?id=<?= $park['ParkID'] ?>" class="park-card-link"></a>
+                            
+                            <div class="park-image" style="background-image:url('/api/placeholder/300/200')"></div>
+                            <div class="park-info">
+                                <div class="park-header">
+                                    <h3><?= htmlspecialchars($park['Name']) ?></h3>
+                                    <div class="heart-icon <?= in_array($park['ParkID'], $user_favorites) ? 'active' : '' ?>" data-park-id="<?= $park['ParkID'] ?>">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <p><?= htmlspecialchars($park['NeighbourhoodName']) ?></p>
+                                <div class="park-features">
+                                    <?php if ($park['Facilities'] == 'Y'): ?>
+                                        <span class="feature">Facilities</span>
+                                    <?php endif; ?>
+                                    <?php if ($park['Washrooms'] == 'Y'): ?>
+                                        <span class="feature">Washrooms</span>
+                                    <?php endif; ?>
+                                    <?php if ($park['SpecialFeatures'] == 'Y'): ?>
+                                        <span class="feature">Special Features</span>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="park-size"><?= htmlspecialchars($park['Hectare']) ?> hectares</div>
                             </div>
-                            <div class="park-size"><?= htmlspecialchars($park['Hectare']) ?> hectares</div>
                         </div>
-                    </a>
-                <?php endwhile; ?>
-            <?php else: ?>
-                <p>No parks available at the moment.</p>
-            <?php endif; ?>
+                    <?php endwhile; ?>
+                <?php else: ?>
+                    <p>No parks available at the moment.</p>
+                <?php endif; ?>
+            </div>
         </div>
-    </div>
-</section>
+    </section>
 
     <footer id="footer">
         <div class="container">
@@ -418,7 +420,11 @@ if (!$all_parks_result) {
       // Add event listeners to heart icons
       const heartIcons = document.querySelectorAll('.heart-icon');
       heartIcons.forEach(icon => {
-        icon.addEventListener('click', function() {
+        icon.addEventListener('click', function(e) {
+          // Prevent the click from propagating to the parent (which would navigate to details page)
+          e.preventDefault();
+          e.stopPropagation();
+          
           if (!isLoggedIn) {
             toast.error('Please log in to add parks to your favourites', 'Login Required');
             return;
@@ -437,23 +443,23 @@ if (!$all_parks_result) {
         // Create form data
         const formData = new FormData();
         formData.append('park_id', parkId);
+        formData.append('action', heartIcon.classList.contains('active') ? 'remove' : 'add');
         
-        // Send request to toggle favorite
-        fetch('toggle_favorite.php', {
+        // Send AJAX request
+        fetch('favorite_action.php', {
           method: 'POST',
           body: formData
         })
         .then(response => response.json())
         .then(data => {
           if (data.success) {
-            if (data.is_favorite) {
-              heartIcon.classList.add('active');
-              toast.success('Park added to your favourites');
-            } else {
-              heartIcon.classList.remove('active');
-              toast.success('Park removed from your favourites');
-            }
+            // Toggle active class
+            heartIcon.classList.toggle('active');
+            
+            // Show success message
+            toast.success(data.message);
           } else {
+            // Show error message
             toast.error(data.message);
           }
           
@@ -464,39 +470,12 @@ if (!$all_parks_result) {
         })
         .catch(error => {
           console.error('Error:', error);
-          toast.error('An error occurred while updating your favourites');
+          toast.error('An error occurred while updating favorites');
           
           // Remove pulse animation
-          heartIcon.classList.remove('heart-pulse');
-        });
-      }
-      
-      // Logout functionality
-      const logoutBtn = document.querySelector('.logout-btn');
-      if (logoutBtn) {
-        logoutBtn.addEventListener('click', function(e) {
-          e.preventDefault();
-          
-          // Send logout request
-          fetch('auth_system.php?action=logout', {
-            method: 'POST'
-          })
-          .then(response => response.json())
-          .then(data => {
-            if (data.success) {
-              // Show success toast
-              toast.success('You have been successfully logged out', 'Logged Out');
-              
-              // Redirect to home page after a short delay
-              setTimeout(() => {
-                window.location.href = 'index.php?logout=success';
-              }, 1500);
-            }
-          })
-          .catch(error => {
-            console.error('Error:', error);
-            toast.error('An error occurred while logging out', 'Error');
-          });
+          setTimeout(() => {
+            heartIcon.classList.remove('heart-pulse');
+          }, 300);
         });
       }
     });
