@@ -2,5 +2,5 @@
  $dbhost = "localhost";
  $dbuser = "root";
  $dbpass = "flamer";
- $dbname = "VancityFinds";
+ $dbname = "VancityFindsTwo";
 ?>
