@@ -53,10 +53,10 @@ $is_guest = is_guest();
               </li>
           </ul>
           
-          <div class="search-bar">
+          <!-- <div class="search-bar">
               <input type="text" placeholder="Search...">
               <button>Search</button>
-          </div>
+          </div> -->
       </div>
   </header>
   
@@ -90,40 +90,33 @@ $is_guest = is_guest();
       <div class="container">
           <h2>Browse by Category</h2>
           <div class="categories-grid">
-              <!-- Categories in HTML -->
-              <div class="category-card">
-                  <div class="category-icon" style="background-image: url('/api/placeholder/300/200')"></div>
-                  <div class="category-name">Cafés & Coffee Shops</div>
-              </div>
-              
-              <a href="restaurants.php" style="text-decoration: none; color: inherit;">
+              <a href="parks.php" style="text-decoration: none; color: inherit;">
                   <div class="category-card">
                       <div class="category-icon" style="background-image: url('/api/placeholder/300/200')"></div>
-                      <div class="category-name">Restaurants & Dining</div>
+                      <div class="category-name">All Parks</div>
                   </div>
               </a>
 
-                <a href="parks.php" style="text-decoration: none; color: inherit;">
-                    <div class="category-card">
-                        <div class="category-icon" style="background-image: url('/api/placeholder/300/200')"></div>
-                        <div class="category-name">Parks</div>
-                    </div>
-                </a>
-              
-              <div class="category-card">
-                  <div class="category-icon" style="background-image: url('/api/placeholder/300/200')"></div>
-                  <div class="category-name">Arts & Culture</div>
-              </div>
-              
-              <div class="category-card">
-                  <div class="category-icon" style="background-image: url('/api/placeholder/300/200')"></div>
-                  <div class="category-name">Shopping & Markets</div>
-              </div>
-              
-              <div class="category-card">
-                  <div class="category-icon" style="background-image: url('/api/placeholder/300/200')"></div>
-                  <div class="category-name">Nightlife</div>
-              </div>
+              <a href="parks.php?category=small" style="text-decoration: none; color: inherit;">
+                  <div class="category-card">
+                      <div class="category-icon" style="background-image: url('/api/placeholder/300/200')"></div>
+                      <div class="category-name">Small Parks</div>
+                  </div>
+              </a>
+
+              <a href="parks.php?category=medium" style="text-decoration: none; color: inherit;">
+                  <div class="category-card">
+                      <div class="category-icon" style="background-image: url('/api/placeholder/300/200')"></div>
+                      <div class="category-name">Medium Parks</div>
+                  </div>
+              </a>
+
+              <a href="parks.php?category=large" style="text-decoration: none; color: inherit;">
+                  <div class="category-card">
+                      <div class="category-icon" style="background-image: url('/api/placeholder/300/200')"></div>
+                      <div class="category-name">Large Parks</div>
+                  </div>
+              </a>
           </div>
       </div>
   </section>

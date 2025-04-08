@@ -53,27 +53,50 @@ $neighborhood_result = mysqli_query($connection, $neighborhood_query);
 $facilities_result = mysqli_query($connection, $facilities_query);
 $washrooms_result = mysqli_query($connection, $washrooms_query);
 
-// Query to fetch all parks with filters
+// Default category selection
+$category = isset($_GET['category']) ? $_GET['category'] : 'all';
 $where_clauses = [];
+
+// Category-based queries
+if ($category == 'small') {
+    $where_clauses[] = "Hectare < 2";
+} elseif ($category == 'medium') {
+    $where_clauses[] = "Hectare BETWEEN 2 AND 5";
+} elseif ($category == 'large') {
+    $where_clauses[] = "Hectare > 5";
+}
+
+// Search filter
+if (isset($_GET['search']) && !empty($_GET['search'])) {
+    $search = mysqli_real_escape_string($connection, $_GET['search']);
+    $where_clauses[] = "Name LIKE '%$search%'";
+}
+
+// Neighborhood filter
 if (isset($_GET['neighborhood']) && $_GET['neighborhood'] != '') {
     $neighborhood = mysqli_real_escape_string($connection, $_GET['neighborhood']);
     $where_clauses[] = "NeighbourhoodName = '$neighborhood'";
 }
+
+// Facilities filter
 if (isset($_GET['facilities']) && $_GET['facilities'] != '') {
     $facilities = mysqli_real_escape_string($connection, $_GET['facilities']);
     $where_clauses[] = "Facilities = '$facilities'";
 }
+
+// Washrooms filter
 if (isset($_GET['washrooms']) && $_GET['washrooms'] != '') {
     $washrooms = mysqli_real_escape_string($connection, $_GET['washrooms']);
     $where_clauses[] = "Washrooms = '$washrooms'";
 }
 
+// Build the WHERE SQL clause
 $where_sql = '';
 if (count($where_clauses) > 0) {
     $where_sql = 'WHERE ' . implode(' AND ', $where_clauses);
 }
 
-// Query to fetch parks with the applied filters
+// Fetch parks based on applied filters
 $select_all_parks_query = "SELECT * FROM parks $where_sql";
 $all_parks_result = mysqli_query($connection, $select_all_parks_query);
 
@@ -169,33 +192,43 @@ if (!$all_parks_result) {
     <!-- Filter Section -->
     <section class="filters-section">
         <div class="container">
-            <form method="GET" action="parks.php">
-                <div class="filter-group">
-                    <label for="neighborhood">Neighborhood:</label>
-                    <select name="neighborhood" id="neighborhood">
-                        <option value="">Select Neighborhood</option>
-                        <?php while ($neighborhood = mysqli_fetch_assoc($neighborhood_result)): ?>
-                            <option value="<?= htmlspecialchars($neighborhood['NeighbourhoodName']) ?>" <?= (isset($_GET['neighborhood']) && $_GET['neighborhood'] == $neighborhood['NeighbourhoodName']) ? 'selected' : '' ?>><?= htmlspecialchars($neighborhood['NeighbourhoodName']) ?></option>
-                        <?php endwhile; ?>
-                    </select>
+            <form id="filter-form">
+            <input type="hidden" name="category" value="<?= isset($_GET['category']) ? htmlspecialchars($_GET['category']) : 'all' ?>">
+                <!-- Search Bar -->
+                <div class="filter-group search-bar">
+                    <input type="text" placeholder="Type a name..." name="search" id="search" value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
                 </div>
-                <div class="filter-group">
-                    <label for="facilities">Facilities:</label>
-                    <select name="facilities" id="facilities">
-                        <option value="">Select Facilities</option>
-                        <option value="Y" <?= (isset($_GET['facilities']) && $_GET['facilities'] == 'Y') ? 'selected' : '' ?>>Available</option>
-                        <option value="N" <?= (isset($_GET['facilities']) && $_GET['facilities'] == 'N') ? 'selected' : '' ?>>Not Available</option>
-                    </select>
+                
+                <!-- Filters Group: Neighborhood, Facilities, Washrooms -->
+                <div class="filter-group filters">
+                    <div class="filter-item">
+                        <label for="neighborhood">Neighborhood</label>
+                        <select name="neighborhood" id="neighborhood">
+                            <option value="">Select Neighborhood</option>
+                            <?php while ($neighborhood = mysqli_fetch_assoc($neighborhood_result)): ?>
+                                <option value="<?= htmlspecialchars($neighborhood['NeighbourhoodName']) ?>" <?= (isset($_GET['neighborhood']) && $_GET['neighborhood'] == $neighborhood['NeighbourhoodName']) ? 'selected' : '' ?>><?= htmlspecialchars($neighborhood['NeighbourhoodName']) ?></option>
+                            <?php endwhile; ?>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label for="facilities">Facilities</label>
+                        <select name="facilities" id="facilities">
+                            <option value="">Select Facilities</option>
+                            <option value="Y" <?= (isset($_GET['facilities']) && $_GET['facilities'] == 'Y') ? 'selected' : '' ?>>Available</option>
+                            <option value="N" <?= (isset($_GET['facilities']) && $_GET['facilities'] == 'N') ? 'selected' : '' ?>>Not Available</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label for="washrooms">Washrooms</label>
+                        <select name="washrooms" id="washrooms">
+                            <option value="">Select Washrooms</option>
+                            <option value="Y" <?= (isset($_GET['washrooms']) && $_GET['washrooms'] == 'Y') ? 'selected' : '' ?>>Available</option>
+                            <option value="N" <?= (isset($_GET['washrooms']) && $_GET['washrooms'] == 'N') ? 'selected' : '' ?>>Not Available</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="filter-group">
-                    <label for="washrooms">Washrooms:</label>
-                    <select name="washrooms" id="washrooms">
-                        <option value="">Select Washrooms</option>
-                        <option value="Y" <?= (isset($_GET['washrooms']) && $_GET['washrooms'] == 'Y') ? 'selected' : '' ?>>Available</option>
-                        <option value="N" <?= (isset($_GET['washrooms']) && $_GET['washrooms'] == 'N') ? 'selected' : '' ?>>Not Available</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn">Apply Filters</button>
+                
+                <button type="submit" class="btn">Search</button>
             </form>
         </div>
     </section>
@@ -203,47 +236,65 @@ if (!$all_parks_result) {
 
     <!-- Parks Grid Section -->
     <section class="parks-section" id="all-parks">
-        <div class="container">
-            <h2 class="parks-title">All Parks</h2>
-            <p class="parks-description">Explore all parks in Vancouver, from large green spaces to small neighborhood parks.</p>
-
-            <!-- Park Cards Container -->
-            <div class="parks-grid">
-                <?php if (mysqli_num_rows($all_parks_result) > 0): ?>
-                    <?php while ($park = mysqli_fetch_assoc($all_parks_result)): ?>
-                        <div class="park-card">
-                            <div class="park-image" style="background-image:url('/api/placeholder/300/200')"></div>
-                            <div class="park-info">
-                                <div class="park-header">
-                                    <h3><?= htmlspecialchars($park['Name']) ?></h3>
-                                    <div class="heart-icon <?= in_array($park['ParkID'], $user_favorites) ? 'active' : '' ?>" data-park-id="<?= $park['ParkID'] ?>">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                                        </svg>
-                                    </div>
-                                </div>
-                                <p><?= htmlspecialchars($park['NeighbourhoodName']) ?></p>
-                                <div class="park-features">
-                                    <?php if ($park['Facilities'] == 'Y'): ?>
-                                        <span class="feature">Facilities</span>
-                                    <?php endif; ?>
-                                    <?php if ($park['Washrooms'] == 'Y'): ?>
-                                        <span class="feature">Washrooms</span>
-                                    <?php endif; ?>
-                                    <?php if ($park['SpecialFeatures'] == 'Y'): ?>
-                                        <span class="feature">Special Features</span>
-                                    <?php endif; ?>
-                                </div>
-                                <div class="park-size"><?= htmlspecialchars($park['Hectare']) ?> hectares</div>
+    <div class="container">
+        <!-- Dynamically change the title and description based on the category -->
+        <h2 class="parks-title">
+            <?php 
+                if ($category == 'small') {
+                    echo 'Small Parks';
+                } elseif ($category == 'medium') {
+                    echo 'Medium Parks';
+                } elseif ($category == 'large') {
+                    echo 'Large Parks';
+                } else {
+                    echo 'All Parks';
+                }
+            ?>
+        </h2>
+        <p class="parks-description">
+            <?php 
+                if ($category == 'small') {
+                    echo 'Explore small parks with an area of less than 2 hectares in Vancouver.';
+                } elseif ($category == 'medium') {
+                    echo 'Explore medium-sized parks with an area ranging from 2 to 5 hectares in Vancouver.';
+                } elseif ($category == 'large') {
+                    echo 'Explore large parks with an area greater than 5 hectares in Vancouver.';
+                } else {
+                    echo 'Explore all parks in Vancouver, from large green spaces to small neighborhood parks.';
+                }
+            ?>
+        </p>
+        <!-- Park Cards Container -->
+        <div class="parks-grid">
+            <?php if (mysqli_num_rows($all_parks_result) > 0): ?>
+                <?php while ($park = mysqli_fetch_assoc($all_parks_result)): ?>
+                    
+                    <a href="park-details.php?id=<?= $park['ParkID'] ?>" class="park-card">
+                        <div class="park-image" style="background-image:url('/api/placeholder/300/200')"></div>
+                        <div class="park-info">
+                            <h3><?= htmlspecialchars($park['Name']) ?></h3>
+                            <p><?= htmlspecialchars($park['NeighbourhoodName']) ?></p>
+                            <div class="park-features">
+                                <?php if ($park['Facilities'] == 'Y'): ?>
+                                    <span class="feature">Facilities</span>
+                                <?php endif; ?>
+                                <?php if ($park['Washrooms'] == 'Y'): ?>
+                                    <span class="feature">Washrooms</span>
+                                <?php endif; ?>
+                                <?php if ($park['SpecialFeatures'] == 'Y'): ?>
+                                    <span class="feature">Special Features</span>
+                                <?php endif; ?>
                             </div>
+                            <div class="park-size"><?= htmlspecialchars($park['Hectare']) ?> hectares</div>
                         </div>
-                    <?php endwhile; ?>
-                <?php else: ?>
-                    <p>No parks available at the moment.</p>
-                <?php endif; ?>
-            </div>
+                    </a>
+                <?php endwhile; ?>
+            <?php else: ?>
+                <p>No parks available at the moment.</p>
+            <?php endif; ?>
         </div>
-    </section>
+    </div>
+</section>
 
     <footer id="footer">
         <div class="container">
