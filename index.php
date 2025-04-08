@@ -78,12 +78,84 @@ $is_guest = is_guest();
           <div class="carousel-container">
               <button class="carousel-button prev-button">&lt;</button>
               <div class="spots-carousel" id="spots-container">
-                  <!-- Spots will be dynamically generated here -->
+                  <?php
+                  // Include the function to get trending parks
+                  require_once("get_trending_parks.php");
+                  
+                  // Get trending parks (limit to 9)
+                  $trending_parks = get_trending_parks(9);
+                  
+                  // Display trending parks
+                  foreach ($trending_parks as $park): 
+                      // Get features for description
+                      $features = [];
+                      if ($park['Facilities'] == 'Y') $features[] = 'Facilities';
+                      if ($park['Washrooms'] == 'Y') $features[] = 'Washrooms';
+                      if ($park['SpecialFeatures'] == 'Y') $features[] = 'Special Features';
+                      $description = !empty($features) ? implode(', ', $features) : 'Park';
+                  ?>
+                  <div class="spot-card">
+                      <div class="spot-image" style="background-image: url('/api/placeholder/400/300')"></div>
+                      <div class="spot-content">
+                          <span class="spot-category"><?= htmlspecialchars($park['NeighbourhoodName']) ?></span>
+                          <h3 class="spot-title"><?= htmlspecialchars($park['Name']) ?></h3>
+                          <p class="spot-description"><?= $description ?></p>
+                          <a href="park-details.php?id=<?= $park['ParkID'] ?>" class="learn-more">Learn More</a>
+                      </div>
+                  </div>
+                  <?php endforeach; ?>
               </div>
               <button class="carousel-button next-button">&gt;</button>
           </div>
       </div>
   </section>
+  
+  <?php
+  // Only show favorites section for logged-in users
+  if ($is_logged_in): 
+      // Include the function to get user favorites
+      require_once("get_user_favorites.php");
+      
+      // Get user's favorite parks (limit to 3)
+      $favorite_parks = get_user_favorite_parks($current_user['id'], 3);
+  ?>
+  <!-- User Favorites Section -->
+  <section class="trending-spots user-favorites" id="favorites">
+      <div class="container">
+          <h2>Your Favorites</h2>
+          <div class="carousel-container">
+              <?php if (count($favorite_parks) > 0): ?>
+                  <div class="spots-carousel" id="favorites-container">
+                      <?php foreach ($favorite_parks as $park): ?>
+                          <div class="spot-card">
+                              <div class="spot-image" style="background-image: url('/api/placeholder/400/300')"></div>
+                              <div class="spot-content">
+                                  <span class="spot-category"><?= htmlspecialchars($park['NeighbourhoodName']) ?></span>
+                                  <h3 class="spot-title"><?= htmlspecialchars($park['Name']) ?></h3>
+                                  <p class="spot-description">
+                                      <?php 
+                                      $features = [];
+                                      if ($park['Facilities'] == 'Y') $features[] = 'Facilities';
+                                      if ($park['Washrooms'] == 'Y') $features[] = 'Washrooms';
+                                      if ($park['SpecialFeatures'] == 'Y') $features[] = 'Special Features';
+                                      echo !empty($features) ? implode(', ', $features) : 'Park';
+                                      ?>
+                                  </p>
+                                  <a href="park-details.php?id=<?= $park['ParkID'] ?>" class="learn-more">Learn More</a>
+                              </div>
+                          </div>
+                      <?php endforeach; ?>
+                  </div>
+              <?php else: ?>
+                  <div class="no-favorites-message">
+                      <p>No Favourites Currently</p>
+                      <a href="parks.php" class="btn">Browse Parks</a>
+                  </div>
+              <?php endif; ?>
+          </div>
+      </div>
+  </section>
+  <?php endif; ?>
       
   <!-- Categories Section -->
   <section class="categories" id="categories">
@@ -273,11 +345,17 @@ $is_guest = is_guest();
   };
   </script>
   
-  <!-- Main JavaScript file -->
+  <!-- Main JavaScript files -->
   <script src="script.js"></script>
+  <script src="favorites.js"></script>
   <script>
     // Override the populateCategories function if needed
     function populateCategories() {
+      return;
+    }
+    
+    // Override the populateSpots function to prevent placeholder data
+    function populateSpots() {
       return;
     }
     

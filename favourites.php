@@ -217,6 +217,7 @@ if ($is_logged_in) {
                                         <?php endif; ?>
                                     </div>
                                     <div class="park-size"><?= htmlspecialchars($park['Hectare']) ?> hectares</div>
+                                    <a href="park-details.php?id=<?= $park['ParkID'] ?>" class="learn-more">Learn More</a>
                                 </div>
                             </div>
                         <?php endforeach; ?>

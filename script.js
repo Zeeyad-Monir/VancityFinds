@@ -1,97 +1,9 @@
 // JavaScript for dynamic functionality
 
-// Sample data for featured spots
-const featuredSpots = [
-  {
-      name: "Revolver Coffee",
-      category: "Café",
-      description: "Specialty coffee shop with rotating selection of beans from around the world.",
-      image: "/api/placeholder/400/300"
-  },
-  {
-      name: "Lynn Canyon Park",
-      category: "Outdoor",
-      description: "Beautiful park with suspension bridge and natural swimming pools.",
-      image: "/api/placeholder/400/300"
-  },
-  {
-      name: "Nemesis Coffee",
-      category: "Café",
-      description: "Modern café serving artisanal coffee and house-made pastries.",
-      image: "/api/placeholder/400/300"
-  },
-  {
-      name: "The Acorn",
-      category: "Restaurant",
-      description: "Award-winning vegetarian restaurant with seasonal menu.",
-      image: "/api/placeholder/400/300"
-  },
-  {
-      name: "Kitsilano Beach",
-      category: "Outdoor",
-      description: "Popular beach with stunning views of downtown and mountains.",
-      image: "/api/placeholder/400/300"
-  },
-  {
-      name: "JJ Bean Coffee",
-      category: "Café",
-      description: "Local coffee roaster with multiple locations around Vancouver.",
-      image: "/api/placeholder/400/300"
-  }
-];
-
 // Sample data for categories
 const categories = [
-  {
-      name: "Cafés & Coffee Shops",
-      icon: "/api/placeholder/300/200"
-  },
-  {
-      name: "Restaurants & Dining",
-      icon: "/api/placeholder/300/200"
-  },
-  {
-      name: "Outdoor Activities",
-      icon: "/api/placeholder/300/200"
-  },
-  {
-      name: "Arts & Culture",
-      icon: "/api/placeholder/300/200"
-  },
-  {
-      name: "Shopping & Markets",
-      icon: "/api/placeholder/300/200"
-  },
-  {
-      name: "Nightlife",
-      icon: "/api/placeholder/300/200"
-  }
+ 
 ];
-
-// Function to populate featured spots
-function populateSpots() {
-  const spotsContainer = document.getElementById('spots-container');
-  
-  // Double the spots array to have more items for carousel
-  const trendingSpots = [...featuredSpots, ...featuredSpots];
-  
-  trendingSpots.forEach(spot => {
-      const spotCard = document.createElement('div');
-      spotCard.className = 'spot-card';
-      
-      spotCard.innerHTML = `
-          <div class="spot-image" style="background-image: url('${spot.image}')"></div>
-          <div class="spot-content">
-              <span class="spot-category">${spot.category}</span>
-              <h3 class="spot-title">${spot.name}</h3>
-              <p class="spot-description">${spot.description}</p>
-              <button class="learn-more">Learn More</button>
-          </div>
-      `;
-      
-      spotsContainer.appendChild(spotCard);
-  });
-}
 
 // Function to populate categories
 function populateCategories() {
@@ -327,7 +239,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   
   // Content population and UI enhancements
-  populateSpots();
   if (typeof populateCategories === 'function') {
     populateCategories();
   }
