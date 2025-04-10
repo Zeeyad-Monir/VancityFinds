@@ -39,7 +39,7 @@ mysqli_stmt_execute($favorites_stmt);
 $favorites_result = mysqli_stmt_get_result($favorites_stmt);
 
 // Google Custom Search API Integration for park images
-$google_api_key = 'AIzaSyDYxCXgYM35xLL51wrmHzbGWraAq66vUU8';  
+$google_api_key = 'AIzaSyDynFyVOku8SS67VrTNBBKEOE9aLBVq4TY';  
 $search_engine_id = '65a27083bf3aa48dd'; 
 
 ?>
@@ -52,12 +52,13 @@ $search_engine_id = '65a27083bf3aa48dd';
     <title>Vancity Finds - My Favorites</title>
     <link rel="stylesheet" href="styles.css">
     <style>
-        /* Heart icon styles */
+        
         .park-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
             margin-bottom: 5px;
+         
         }
         
         .heart-icon {

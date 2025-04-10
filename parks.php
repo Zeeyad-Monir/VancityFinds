@@ -107,7 +107,7 @@ if (!$all_parks_result) {
 }
 
 // Google Custom Search API Integration for park images
-$google_api_key = 'AIzaSyAIeCH_KgShIDgt59j9SSkFWoj9v6ys79Y';  
+$google_api_key = 'AIzaSyDynFyVOku8SS67VrTNBBKEOE9aLBVq4TY';  
 $search_engine_id = '65a27083bf3aa48dd'; 
 
 ?>
@@ -117,7 +117,7 @@ $search_engine_id = '65a27083bf3aa48dd';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vancity Finds - Parks</title>
+    <title>Vancity Parks</title>
     <link rel="stylesheet" href="styles.css">
     <style>
         /* Heart icon styles */
@@ -398,7 +398,7 @@ $search_engine_id = '65a27083bf3aa48dd';
 <body>
     <header>
         <div class="container header-container">
-            <a href="index.php" class="logo">Vancity Finds</a>
+            <a href="index.php" class="logo">Vancity Parks</a>
             <ul class="nav-menu">
                 <li><a href="index.php">Home</a></li>
                 <li><a href="#categories">Browse Spots</a></li>
