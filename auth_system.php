@@ -48,7 +48,8 @@ function get_current_user_app() {
 
 /**
  * Check if user is logged in
- * @return bool True if user is logged in, false otherwise
+ * @return bool 
+ * True if user is logged in, not true otherwise
  */
 function is_logged_in() {
     return isset($_SESSION['user_id']);
@@ -56,7 +57,8 @@ function is_logged_in() {
 
 /**
  * Check if user is a guest
- * @return bool True if user is a guest, false otherwise
+ * @return bool 
+ * True if user is logged in, not true otherwise
  */
 function is_guest() {
     return isset($_SESSION['is_guest']) && $_SESSION['is_guest'] === true;
@@ -65,8 +67,8 @@ function is_guest() {
 /**
  * Register a new user
  * @param string $email User email
- * @param string $password User password (plain text)
- * @param string $display_name User display name (optional)
+ * @param string $password User password 
+ * @param string $display_name User display name 
  * @return array Result with status and message
  */
 function register_user($email, $password, $display_name = null) {
@@ -133,7 +135,7 @@ function register_user($email, $password, $display_name = null) {
 /**
  * Login a user
  * @param string $email User email
- * @param string $password User password (plain text)
+ * @param string $password User password 
  * @return array Result with status and message
  */
 function login_user($email, $password) {
