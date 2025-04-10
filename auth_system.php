@@ -93,7 +93,7 @@ function register_user($email, $password, $display_name = null) {
     
     mysqli_stmt_close($stmt);
     
-    // Hash password
+    // Hashing password
     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
     
     // Insert new user
@@ -112,7 +112,7 @@ function register_user($email, $password, $display_name = null) {
         mysqli_stmt_execute($role_stmt);
         mysqli_stmt_close($role_stmt);
         
-        // Create session for the new user
+        // Creating session for the new user
         $_SESSION['user_id'] = $user_id;
         $_SESSION['email'] = $email;
         $_SESSION['display_name'] = $display_name;
@@ -193,7 +193,8 @@ function login_user($email, $password) {
 
 /**
  * Create a guest session
- * @return array Guest session information
+ * @return array 
+ * Guest session information
  */
 function create_guest_session() {
     $_SESSION['is_guest'] = true;
@@ -224,10 +225,6 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-/**
- * Alias function to support calls to get_current_user()
- * (Avoids conflicting with PHP's built-in get_current_user())
- */
 if (!function_exists('get_current_user')) {
   function get_current_user() {
       return get_current_user_app();
