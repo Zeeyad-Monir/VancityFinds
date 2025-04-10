@@ -95,6 +95,12 @@ if (isset($images['items'][0]['link'])) {
     $image_url = './photos/default-image.jpg';  // Fallback to default image if none found
 }
 
+// Get map coordinates from GoogleMapDest
+$map_coordinates = $park['GoogleMapDest'] ?? '49.2827, -123.1207'; // Default to Vancouver downtown if not found
+$coordinates = explode(',', $map_coordinates);
+$latitude = trim($coordinates[0]);
+$longitude = trim($coordinates[1]);
+
 ?>
 
 <!DOCTYPE html>
@@ -105,11 +111,13 @@ if (isset($images['items'][0]['link'])) {
     <title><?= htmlspecialchars($park['Name']) ?> - Park Details</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <style>
         :root {
-            --primary-color: #2563eb;
-            --secondary-color: #1e40af;
-            --accent-color: #3b82f6;
+            --primary-color: #2c5282;
+            --secondary-color: #2c5282;
+            --accent-color: #2c5282;
             --light-bg: #f8fafc;
             --dark-bg: #1e293b;
             --text-dark: #1e293b;
@@ -548,6 +556,81 @@ if (isset($images['items'][0]['link'])) {
             margin-right: 0.5rem;
         }
         
+        /* Map Styling */
+        .map-container {
+            margin-top: 2rem;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+        }
+        
+        #park-map {
+            width: 100%;
+            height: 350px;
+            border-radius: var(--border-radius);
+        }
+        
+        .map-section {
+            padding: 2rem 0;
+            background-color: white;
+        }
+        
+        .map-section h2 {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        
+        .map-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+        }
+        
+        .map-header {
+            padding: 1.5rem;
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .map-header h3 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        
+        .map-body {
+            padding: 1.5rem;
+        }
+        
+        .map-footer {
+            padding: 1rem 1.5rem;
+            background-color: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .directions-link {
+            display: inline-flex;
+            align-items: center;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+        
+        .directions-link i {
+            margin-right: 0.5rem;
+        }
+        
+        .directions-link:hover {
+            color: var(--secondary-color);
+            text-decoration: underline;
+        }
+        
         /* Review Section Styles */
         .reviews-section {
             margin-top: 2rem;
@@ -673,7 +756,7 @@ if (isset($images['items'][0]['link'])) {
         
         .delete-review {
             position: absolute;
-            top: 1rem;
+            top: 5rem;
             right: 1rem;
             background: none;
             border: none;
@@ -826,6 +909,10 @@ if (isset($images['items'][0]['link'])) {
             
             .park-info, .park-image-container {
                 margin-bottom: 2rem;
+            }
+            
+            #park-map {
+                height: 300px;
             }
         }
     </style>
@@ -1003,6 +1090,26 @@ if (isset($images['items'][0]['link'])) {
         </div>
     </section>
 
+    <!-- Map Section -->
+    <section class="map-section">
+        <div class="container">
+            <div class="map-card">
+                <div class="map-header">
+                    <h3><i class="fas fa-map-marker-alt"></i> Park Location</h3>
+                </div>
+                <div class="map-body">
+                    <div id="park-map"></div>
+                </div>
+                <div class="map-footer">
+                    <p><?= htmlspecialchars($park['StreetNumber']) ?> <?= htmlspecialchars($park['StreetName']) ?>, <?= htmlspecialchars($park['NeighbourhoodName']) ?></p>
+                    <a href="https://www.openstreetmap.org/directions?from=&to=<?= $latitude ?>%2C<?= $longitude ?>" target="_blank" class="directions-link">
+                        <i class="fas fa-directions"></i> Get Directions
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Reviews Section -->
     <section class="reviews-section">
         <div class="container">
@@ -1064,8 +1171,58 @@ if (isset($images['items'][0]['link'])) {
     <!-- Toast Notification Container -->
     <div id="toast-container" class="toast-container"></div>
 
-    <script src="script.js"></script>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
     <script>
+        // Initialize Leaflet Map
+        document.addEventListener('DOMContentLoaded', function() {
+            // Parse coordinates from PHP variables
+            const lat = <?= $latitude ?>;
+            const lng = <?= $longitude ?>;
+            
+            // Create map centered at park location
+            const map = L.map('park-map').setView([lat, lng], 15);
+            
+            // Add OpenStreetMap tile layer
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                maxZoom: 19
+            }).addTo(map);
+            
+            // Add marker for park location
+            const marker = L.marker([lat, lng]).addTo(map);
+            
+            // Add popup with park details
+            marker.bindPopup(`
+                <div style="padding: 10px; max-width: 300px;">
+                    <h3 style="margin-top: 0; color: #2563eb; font-size: 16px;"><?= htmlspecialchars($park['Name']) ?></h3>
+                    <p style="margin-bottom: 5px;"><strong>Address:</strong> <?= htmlspecialchars($park['StreetNumber']) ?> <?= htmlspecialchars($park['StreetName']) ?></p>
+                    <p style="margin-bottom: 5px;"><strong>Neighborhood:</strong> <?= htmlspecialchars($park['NeighbourhoodName']) ?></p>
+                    <p style="margin-bottom: 5px;"><strong>Size:</strong> <?= htmlspecialchars($park['Hectare']) ?> hectares</p>
+                </div>
+            `).openPopup();
+            
+            // Add circle to show approximate park area
+            const hectares = parseFloat('<?= $park['Hectare'] ?>');
+            if (!isNaN(hectares)) {
+                // Convert hectares to square meters (1 hectare = 10,000 sq meters)
+                const area = hectares * 10000;
+                
+                // Calculate radius in meters (area = π * r²)
+                const radius = Math.sqrt(area / Math.PI);
+                
+                // Add circle with calculated radius
+                L.circle([lat, lng], {
+                    radius: radius,
+                    color: '#2563eb',
+                    fillColor: '#3b82f6',
+                    fillOpacity: 0.2,
+                    weight: 2
+                }).addTo(map);
+            }
+        });
+
         /***** Toast Notification System *****/
         class ToastNotification {
             constructor() {
@@ -1323,12 +1480,6 @@ if (isset($images['items'][0]['link'])) {
             });
         }
 
-        // Add event listener to review form
-        const reviewForm = document.getElementById('review-form');
-        if (reviewForm) {
-            reviewForm.addEventListener('submit', handleReviewSubmit);
-        }
-
         // Mobile navigation toggle
         const hamburger = document.querySelector('.hamburger');
         const navMenu = document.querySelector('.nav-menu');
@@ -1339,14 +1490,76 @@ if (isset($images['items'][0]['link'])) {
             });
         }
 
+        // Heart icon functionality for favorites
+        const heartIcon = document.querySelector('.heart-icon');
+        if (heartIcon) {
+            heartIcon.addEventListener('click', function() {
+                // Check if user is logged in
+                const isLoggedIn = <?= $is_logged_in ? 'true' : 'false' ?>;
+                
+                if (!isLoggedIn) {
+                    showToast('Please log in to add favorites', 'error', 'Login Required');
+                    
+                    // Optionally redirect to login page
+                    setTimeout(() => {
+                        window.location.href = 'auth.php?mode=login';
+                    }, 2000);
+                    
+                    return;
+                }
+                
+                // Get park ID from data attribute
+                const parkId = this.dataset.parkId;
+                
+                // Add pulse animation
+                this.classList.add('heart-pulse');
+                
+                // Remove animation after it completes
+                setTimeout(() => {
+                    this.classList.remove('heart-pulse');
+                }, 300);
+                
+                // Toggle favorite via AJAX
+                const formData = new FormData();
+                formData.append('park_id', parkId);
+                
+                fetch('toggle_favorite.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update heart icon appearance
+                        if (data.is_favorite) {
+                            this.classList.add('active');
+                            showToast('Added to favorites', 'success');
+                        } else {
+                            this.classList.remove('active');
+                            showToast('Removed from favorites', 'success');
+                        }
+                    } else {
+                        showToast(data.message, 'error', 'Error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error toggling favorite:', error);
+                    showToast('Failed to update favorites. Please try again.', 'error', 'Error');
+                });
+            });
+        }
+
+        // Add event listener to review form
+        const reviewForm = document.getElementById('review-form');
+        if (reviewForm) {
+            reviewForm.addEventListener('submit', handleReviewSubmit);
+        }
+
         // Load reviews when page loads
         document.addEventListener('DOMContentLoaded', () => {
             loadReviews();
         });
     </script>
-    
-    <!-- Include favorites.js for heart icon functionality -->
-    <script src="favorites.js"></script>
 </body>
 </html>
 

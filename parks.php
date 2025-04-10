@@ -175,94 +175,105 @@ $search_engine_id = '65a27083bf3aa48dd';
         }
         
         /* Park card positioning */
-        .park-card-container {
-            position: relative;
-            background-color: #f8f8f8;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        
-        .park-card-container:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-        }
-        
-        .park-card {
-            display: block;
-            text-decoration: none;
-            color: inherit;
-        }
-        
-        /* Park image styling */
-        .park-image {
-            width: 100%;
-            height: 200px;
-            overflow: hidden;
-            position: relative;
-        }
-        
-        .park-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            object-position: center;
-            transition: transform 0.3s ease;
-        }
-        
-        .park-card:hover .park-image img {
-            transform: scale(1.05);
-        }
-        
-        /* Park info styling */
-        .park-info {
-            padding: 15px;
-        }
-        
-        .park-info h3 {
-            margin: 0 0 5px 0;
-            font-size: 1.2rem;
-            font-weight: 600;
-        }
-        
-        .park-info p {
-            margin: 0 0 10px 0;
-            color: #666;
-            font-size: 0.9rem;
-        }
-        
-        /* Park features styling */
-        .park-features {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-            margin-bottom: 10px;
-        }
-        
-        .feature {
-            background-color: #007bff;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            font-weight: 500;
-        }
-        
-        /* Park size styling */
-        .park-size {
-            font-size: 0.9rem;
-            color: #555;
-            margin-top: 5px;
-        }
-        
-        /* Parks grid layout */
-        .parks-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
+.park-card-container {
+    position: relative;
+    background-color: #f8f8f8;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.park-card-container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.park-card {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: inherit;
+    height: 100%;
+}
+
+/* Park image styling */
+.park-image {
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.park-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 0.3s ease;
+}
+
+.park-card:hover .park-image img {
+    transform: scale(1.05);
+}
+
+/* Park info styling */
+.park-info {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.park-info h3 {
+    margin: 0 0 5px 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.park-info p {
+    margin: 0 0 10px 0;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* Park features styling */
+.park-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 10px;
+    flex-grow: 0;
+}
+
+.feature {
+    background-color: #007bff;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+/* Park size styling */
+.park-size {
+    font-size: 0.9rem;
+    color: #555;
+    margin-top: auto;
+    padding-top: 5px;
+}
+
+/* Parks grid layout */
+.parks-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
         
         /* Responsive adjustments */
         @media (max-width: 768px) {
