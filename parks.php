@@ -107,7 +107,7 @@ if (!$all_parks_result) {
 }
 
 // Google Custom Search API Integration for park images
-$google_api_key = 'AIzaSyDYxCXgYM35xLL51wrmHzbGWraAq66vUU8';  
+$google_api_key = 'AIzaSyAIeCH_KgShIDgt59j9SSkFWoj9v6ys79Y';  
 $search_engine_id = '65a27083bf3aa48dd'; 
 
 ?>
@@ -195,7 +195,7 @@ $search_engine_id = '65a27083bf3aa48dd';
             color: inherit;
         }
         
-        /* Park image styling - FIXED */
+        /* Park image styling */
         .park-image {
             width: 100%;
             height: 200px;
@@ -486,7 +486,7 @@ $search_engine_id = '65a27083bf3aa48dd';
                 ?>
             </p>
             <!-- Park Cards Container -->
-            <div class="parks-grid">
+            <div class="parks-grid" id="parks-grid">
                 <?php if (mysqli_num_rows($all_parks_result) > 0): ?>
                     <?php while ($park = mysqli_fetch_assoc($all_parks_result)): ?>
                         <?php
@@ -681,75 +681,140 @@ $search_engine_id = '65a27083bf3aa48dd';
             id: <?= $is_logged_in ? $current_user['id'] : 'null' ?>
         };
         
-        // Direct implementation of favorites functionality
+        // Favorites functionality
         document.addEventListener('DOMContentLoaded', function() {
-            // Get all heart icons
-            const heartIcons = document.querySelectorAll('.heart-icon');
-            
-            // Add click event listener to each heart icon
-            heartIcons.forEach(heart => {
-                heart.addEventListener('click', function(event) {
-                    event.preventDefault();
-                    event.stopPropagation(); // Prevent triggering the parent link
-                    
-                    // Check if user is logged in
-                    if (!currentUser.isLoggedIn) {
-                        // Show toast notification
-                        showToast('Please log in to add favorites', 'error', 'Login Required');
+            // Initialize heart icons for favorites
+            function initHeartIcons() {
+                // Get all heart icons
+                const heartIcons = document.querySelectorAll('.heart-icon');
+                
+                // Add click event listener to each heart icon
+                heartIcons.forEach(heart => {
+                    heart.addEventListener('click', function(event) {
+                        event.preventDefault();
+                        event.stopPropagation(); // Prevent triggering the parent link
                         
-                        // Optionally redirect to login page
-                        setTimeout(() => {
-                            window.location.href = 'auth.php?mode=login';
-                        }, 2000);
-                        
-                        return;
-                    }
-                    
-                    // Get park ID from data attribute
-                    const parkId = this.dataset.parkId;
-                    
-                    // Add pulse animation
-                    this.classList.add('heart-pulse');
-                    
-                    // Remove animation after it completes
-                    setTimeout(() => {
-                        this.classList.remove('heart-pulse');
-                    }, 300);
-                    
-                    // Toggle favorite via AJAX
-                    const formData = new FormData();
-                    formData.append('park_id', parkId);
-                    
-                    fetch('toggle_favorite.php', {
-                        method: 'POST',
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Update heart icon appearance
-                            if (data.is_favorite) {
-                                this.classList.add('active');
-                                showToast('Added to favorites', 'success');
-                            } else {
-                                this.classList.remove('active');
-                                showToast('Removed from favorites', 'success');
-                            }
-                        } else {
-                            showToast(data.message, 'error', 'Error');
+                        // Check if user is logged in
+                        if (!currentUser.isLoggedIn) {
+                            // Show toast notification
+                            showToast('Please log in to add favorites', 'error', 'Login Required');
+                            
+                            // Optionally redirect to login page
+                            setTimeout(() => {
+                                window.location.href = 'auth.php?mode=login';
+                            }, 2000);
+                            
+                            return;
                         }
-                    })
-                    .catch(error => {
-                        console.error('Error toggling favorite:', error);
-                        showToast('Failed to update favorites. Please try again.', 'error', 'Error');
+                        
+                        // Get park ID from data attribute
+                        const parkId = this.dataset.parkId;
+                        
+                        // Add pulse animation
+                        this.classList.add('heart-pulse');
+                        
+                        // Remove animation after it completes
+                        setTimeout(() => {
+                            this.classList.remove('heart-pulse');
+                        }, 300);
+                        
+                        // Toggle favorite via AJAX
+                        const formData = new FormData();
+                        formData.append('park_id', parkId);
+                        
+                        fetch('toggle_favorite.php', {
+                            method: 'POST',
+                            body: formData
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Update heart icon appearance
+                                if (data.is_favorite) {
+                                    this.classList.add('active');
+                                    showToast('Added to favorites', 'success');
+                                } else {
+                                    this.classList.remove('active');
+                                    showToast('Removed from favorites', 'success');
+                                }
+                            } else {
+                                showToast(data.message, 'error', 'Error');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error toggling favorite:', error);
+                            showToast('Failed to update favorites. Please try again.', 'error', 'Error');
+                        });
                     });
                 });
+            }
+            
+            // Initialize heart icons on page load
+            initHeartIcons();
+            
+            // Function to load parks based on search and filters
+            function loadParks() {
+                // Get form data
+                const formData = new FormData(document.getElementById('filter-form'));
+                
+                // Get selected category value from the URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const category = urlParams.get('category') || 'all';
+                formData.append('category', category);
+                
+                // Convert FormData to URL parameters
+                const params = new URLSearchParams(formData);
+                
+                // Make AJAX request
+                fetch(`parks.php?${params.toString()}`, {
+                    method: 'GET'
+                })
+                .then(response => response.text())
+                .then(html => {
+                    // Create a temporary element to parse the HTML
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = html;
+                    
+                    // Extract the parks grid content
+                    const newParksGrid = tempDiv.querySelector('#parks-grid');
+                    
+                    // Update the parks grid with the new content
+                    if (newParksGrid) {
+                        document.getElementById('parks-grid').innerHTML = newParksGrid.innerHTML;
+                        
+                        // Re-initialize heart icons for the new content
+                        initHeartIcons();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading parks:', error);
+                    showToast('Failed to load parks. Please try again.', 'error', 'Error');
+                });
+            }
+            
+            // Handle form submission for search/filter
+            document.getElementById('filter-form').addEventListener('submit', function(event) {
+                event.preventDefault(); // Prevent page reload
+                
+                // Update URL with form parameters without reloading the page
+                const formData = new FormData(this);
+                const params = new URLSearchParams(formData);
+                
+                // Get selected category from hidden input
+                const category = this.querySelector('input[name="category"]').value;
+                if (category && category !== 'all') {
+                    params.set('category', category);
+                }
+                
+                // Update URL without reloading
+                const newUrl = `${window.location.pathname}?${params.toString()}`;
+                window.history.pushState({ path: newUrl }, '', newUrl);
+                
+                // Load parks with the new filters
+                loadParks();
             });
         });
     </script>
-    
-    <!-- Parks page specific JavaScript -->
-    <script src="parks.js"></script>
 </body>
 </html>
 
