@@ -1,13 +1,9 @@
 <?php
 
-
 // Include database credentials
-require_once("db_credentials.php");
+require_once("./database/db_credentials.php");
 
-/**
- * Establish database connection
- * @return mysqli Database connection object
- */
+/** Establish database connection and check for error **/
 function get_db_connection() {
     global $dbhost, $dbuser, $dbpass, $dbname;
     
@@ -15,8 +11,7 @@ function get_db_connection() {
     
     if (mysqli_connect_errno()) {
         die("Database connection failed: " . mysqli_connect_error());
-    }
-    
+    } 
     return $connection;
 }
 

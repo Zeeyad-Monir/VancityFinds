@@ -1,6 +1,6 @@
 <?php
 // Include database credentials
-require("db_credentials.php");
+require("./database/db_credentials.php");
 
 // Include authentication system
 require_once("auth_system.php");
@@ -128,199 +128,9 @@ $longitude = trim($coordinates[1]);
             --transition: all 0.3s ease;
         }
         
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: var(--text-dark);
-            background-color: #f8fafc;
-            margin: 0;
-            padding: 0;
-        }
-        
-        .container {
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 1.5rem;
-        }
-        
-        /* Header Styling */
-        header {
-            background-color: white;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            padding: 1rem 0;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        
-        .header-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            text-decoration: none;
-            transition: var(--transition);
-        }
-        
-        .logo:hover {
-            color: var(--secondary-color);
-        }
-        
-        /* Navigation Menu */
-        .hamburger {
-            display: none;
-            flex-direction: column;
-            cursor: pointer;
-        }
-        
-        .hamburger div {
-            width: 25px;
-            height: 3px;
-            background-color: var(--primary-color);
-            margin: 3px 0;
-            transition: var(--transition);
-        }
-        
-        .nav-menu {
-            display: flex;
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            align-items: center;
-        }
-        
-        .nav-menu li {
-            margin-left: 1.5rem;
-        }
-        
-        .nav-menu a {
-            color: var(--text-dark);
-            text-decoration: none;
-            font-weight: 500;
-            transition: var(--transition);
-        }
-        
-        .nav-menu a:hover {
-            color: var(--primary-color);
-        }
-        
-        /* Auth Buttons */
-        .auth-buttons {
-            display: flex;
-            align-items: center;
-        }
-        
-        .logged-out-buttons, .logged-in-buttons {
-            display: flex;
-            align-items: center;
-        }
-        
-        .btn {
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            font-weight: 500;
-            text-decoration: none;
-            transition: var(--transition);
-            cursor: pointer;
-        }
-        
-        .login-btn {
-            color: var(--primary-color);
-            background-color: transparent;
-            border: 1px solid var(--primary-color);
-            margin-right: 0.5rem;
-        }
-        
-        .login-btn:hover {
-            background-color: var(--primary-color);
-            color: white;
-        }
-        
-        .signup-btn, .logout-btn {
-            color: white;
-            background-color: var(--primary-color);
-            border: 1px solid var(--primary-color);
-        }
-        
-        .signup-btn:hover, .logout-btn:hover {
-            background-color: var(--secondary-color);
-            border-color: var(--secondary-color);
-        }
-        
-        .user-greeting {
-            margin-right: 1rem;
-            font-size: 0.9rem;
-            color: var(--text-light);
-        }
-        
-        .username {
-            font-weight: 600;
-            color: var(--primary-color);
-        }
-        
-        /* Responsive Navigation */
-        @media (max-width: 768px) {
-            .hamburger {
-                display: flex;
-            }
-            
-            .nav-menu {
-                position: fixed;
-                top: 60px;
-                left: -100%;
-                flex-direction: column;
-                background-color: white;
-                width: 100%;
-                text-align: center;
-                transition: 0.3s;
-                box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
-                padding: 2rem 0;
-                z-index: 99;
-            }
-            
-            .nav-menu.active {
-                left: 0;
-            }
-            
-            .nav-menu li {
-                margin: 1.5rem 0;
-            }
-            
-            .auth-buttons {
-                flex-direction: column;
-                width: 100%;
-            }
-            
-            .logged-out-buttons, .logged-in-buttons {
-                flex-direction: column;
-                width: 100%;
-            }
-            
-            .btn {
-                width: 80%;
-                margin: 0.5rem auto;
-                text-align: center;
-            }
-            
-            .login-btn {
-                margin-right: 0;
-            }
-            
-            .user-greeting {
-                margin-right: 0;
-                margin-bottom: 0.5rem;
-            }
-        }
-        
         /* Park Details Section Styling */
         .park-details-section {
-            padding: 3rem 0;
+            padding: 8rem;
             background-color: white;
         }
         
@@ -924,13 +734,6 @@ $longitude = trim($coordinates[1]);
     <header>
         <div class="container header-container">
             <a href="index.php" class="logo">Vancity Finds</a>
-            
-            <div class="hamburger">
-                <div></div>
-                <div></div>
-                <div></div>
-            </div>
-            
             <ul class="nav-menu">
                 <li><a href="index.php">Home</a></li>
                 <li><a href="parks.php">Browse Spots</a></li>

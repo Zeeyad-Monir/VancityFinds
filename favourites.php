@@ -18,7 +18,7 @@ if (!$has_access) {
 }
 
 // Establish connection to the database
-require_once("db_credentials.php");
+require_once("./database/db_credentials.php");
 $connection = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
 
 // Check if the connection was successful
@@ -39,7 +39,7 @@ mysqli_stmt_execute($favorites_stmt);
 $favorites_result = mysqli_stmt_get_result($favorites_stmt);
 
 // Google Custom Search API Integration for park images
-$google_api_key = 'AIzaSyDynFyVOku8SS67VrTNBBKEOE9aLBVq4TY';  
+$google_api_key = 'AIzaSyAxiNMGiHju-pnUEtYGDluBQlRfTZXhrZc';  
 $search_engine_id = '65a27083bf3aa48dd'; 
 
 ?>
@@ -354,7 +354,7 @@ $search_engine_id = '65a27083bf3aa48dd';
 <body>
     <header>
         <div class="container header-container">
-            <a href="index.php" class="logo">Vancity Finds</a>
+            <a href="index.php" class="logo">Vancity Parks</a>
             <ul class="nav-menu">
                 <li><a href="index.php">Home</a></li>
                 <li><a href="parks.php">Browse Spots</a></li>

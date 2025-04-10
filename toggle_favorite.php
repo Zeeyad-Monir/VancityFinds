@@ -32,7 +32,7 @@ $user_id = $current_user['id'];
 $park_id = $_POST['park_id'];
 
 // Establish connection to the database
-require_once("db_credentials.php");
+require_once("./database/db_credentials.php");
 $connection = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
 
 // Check if the connection was successful

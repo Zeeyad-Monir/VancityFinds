@@ -12,7 +12,7 @@ $is_logged_in = ($current_user !== null);
 $is_guest = is_guest();
 
 // Google Custom Search API Integration for park images
-$google_api_key = 'AIzaSyDynFyVOku8SS67VrTNBBKEOE9aLBVq4TY';  
+$google_api_key = 'AIzaSyAxiNMGiHju-pnUEtYGDluBQlRfTZXhrZc';  
 $search_engine_id = '65a27083bf3aa48dd'; 
 ?>
 <!DOCTYPE html>
@@ -443,8 +443,8 @@ $search_engine_id = '65a27083bf3aa48dd';
   </script>
   
   <!-- Main JavaScript files -->
-  <script src="script.js"></script>
-  <script src="favorites.js"></script>
+  <script src="./javascript/script.js"></script>
+  <script src="favourites.js"></script>
   <script>
     // Override the populateCategories function if needed
     function populateCategories() {

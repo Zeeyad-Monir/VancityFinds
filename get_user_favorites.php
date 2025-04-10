@@ -8,7 +8,7 @@
  */
 function get_user_favorite_parks($user_id, $limit = 3) {
     // Establish connection to the database
-    require_once("db_credentials.php");
+    require_once("./database/db_credentials.php");
     global $dbhost, $dbuser, $dbpass, $dbname;
     $connection = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
     

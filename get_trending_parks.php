@@ -12,7 +12,7 @@
  */
 function get_trending_parks($limit = 9) {
     // Establish connection to the database
-    require_once("db_credentials.php");
+    require_once("./database/db_credentials.php");
     global $dbhost, $dbuser, $dbpass, $dbname;
     $connection = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
     

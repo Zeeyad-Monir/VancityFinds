@@ -18,7 +18,7 @@ if (!$has_access) {
 }
 
 // Establish connection to the database
-require_once("db_credentials.php");
+require_once("./database/db_credentials.php");
 $connection = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
 
 // Check if the connection was successful
@@ -107,7 +107,7 @@ if (!$all_parks_result) {
 }
 
 // Google Custom Search API Integration for park images
-$google_api_key = 'AIzaSyDynFyVOku8SS67VrTNBBKEOE9aLBVq4TY';  
+$google_api_key = 'AIzaSyAxiNMGiHju-pnUEtYGDluBQlRfTZXhrZc';  
 $search_engine_id = '65a27083bf3aa48dd'; 
 
 ?>

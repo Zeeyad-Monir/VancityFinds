@@ -1,6 +1,6 @@
 <?php
 // Include database credentials
-require_once("db_credentials.php");
+require_once("./database/db_credentials.php");
 
 // Start session if not already started
 if (session_status() === PHP_SESSION_NONE) {
