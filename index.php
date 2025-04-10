@@ -12,7 +12,7 @@ $is_logged_in = ($current_user !== null);
 $is_guest = is_guest();
 
 // Google Custom Search API Integration for park images
-$google_api_key = 'AIzaSyAIeCH_KgShIDgt59j9SSkFWoj9v6ys79Y';  
+$google_api_key = 'AIzaSyDYxCXgYM35xLL51wrmHzbGWraAq66vUU8';  
 $search_engine_id = '65a27083bf3aa48dd'; 
 ?>
 <!DOCTYPE html>

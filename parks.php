@@ -107,7 +107,7 @@ if (!$all_parks_result) {
 }
 
 // Google Custom Search API Integration for park images
-$google_api_key = 'AIzaSyBt315xmQp1AKPFJYyfx8SV5vT1gcqOJ-Y';  
+$google_api_key = 'AIzaSyDYxCXgYM35xLL51wrmHzbGWraAq66vUU8';  
 $search_engine_id = '65a27083bf3aa48dd'; 
 
 ?>
@@ -149,18 +149,18 @@ $search_engine_id = '65a27083bf3aa48dd';
         
         .heart-icon svg path {
             fill: transparent;
-            stroke: var(--dark-color);
+            stroke: #333;
             stroke-width: 2;
             transition: all 0.3s ease;
         }
         
         .heart-icon.active svg path {
-            fill: var(--accent-color);
-            stroke: var(--accent-color);
+            fill: #ff3b30;
+            stroke: #ff3b30;
         }
         
         .heart-icon:hover svg path {
-            stroke: var(--accent-color);
+            stroke: #ff3b30;
         }
         
         /* Animation for heart when clicked */
@@ -566,6 +566,9 @@ $search_engine_id = '65a27083bf3aa48dd';
     <!-- Toast Notification Container -->
     <div id="toast-container" class="toast-container"></div>
     
+    <!-- jQuery for AJAX functionality -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
     <!-- Toast Notification System -->
     <script>
         /***** Toast Notification System *****/
@@ -677,12 +680,86 @@ $search_engine_id = '65a27083bf3aa48dd';
             isLoggedIn: <?= $is_logged_in ? 'true' : 'false' ?>,
             id: <?= $is_logged_in ? $current_user['id'] : 'null' ?>
         };
+        
+        // Direct implementation of favorites functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get all heart icons
+            const heartIcons = document.querySelectorAll('.heart-icon');
+            
+            // Add click event listener to each heart icon
+            heartIcons.forEach(heart => {
+                heart.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    event.stopPropagation(); // Prevent triggering the parent link
+                    
+                    // Check if user is logged in
+                    if (!currentUser.isLoggedIn) {
+                        // Show toast notification
+                        showToast('Please log in to add favorites', 'error', 'Login Required');
+                        
+                        // Optionally redirect to login page
+                        setTimeout(() => {
+                            window.location.href = 'auth.php?mode=login';
+                        }, 2000);
+                        
+                        return;
+                    }
+                    
+                    // Get park ID from data attribute
+                    const parkId = this.dataset.parkId;
+                    
+                    // Add pulse animation
+                    this.classList.add('heart-pulse');
+                    
+                    // Remove animation after it completes
+                    setTimeout(() => {
+                        this.classList.remove('heart-pulse');
+                    }, 300);
+                    
+                    // Toggle favorite via AJAX
+                    const formData = new FormData();
+                    formData.append('park_id', parkId);
+                    
+                    fetch('toggle_favorite.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Update heart icon appearance
+                            if (data.is_favorite) {
+                                this.classList.add('active');
+                                showToast('Added to favorites', 'success');
+                            } else {
+                                this.classList.remove('active');
+                                showToast('Removed from favorites', 'success');
+                            }
+                        } else {
+                            showToast(data.message, 'error', 'Error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error toggling favorite:', error);
+                        showToast('Failed to update favorites. Please try again.', 'error', 'Error');
+                    });
+                });
+            });
+        });
     </script>
-    
-    <!-- Include favorites.js for heart icon functionality -->
-    <script src="favorites.js"></script>
     
     <!-- Parks page specific JavaScript -->
     <script src="parks.js"></script>
 </body>
 </html>
+
+<?php
+// Free the result sets
+mysqli_free_result($all_parks_result);
+mysqli_free_result($neighborhood_result);
+mysqli_free_result($facilities_result);
+mysqli_free_result($washrooms_result);
+
+// Close the connection
+mysqli_close($connection);
+?>

@@ -39,7 +39,7 @@ mysqli_stmt_execute($favorites_stmt);
 $favorites_result = mysqli_stmt_get_result($favorites_stmt);
 
 // Google Custom Search API Integration for park images
-$google_api_key = 'AIzaSyBt315xmQp1AKPFJYyfx8SV5vT1gcqOJ-Y';  
+$google_api_key = 'AIzaSyDYxCXgYM35xLL51wrmHzbGWraAq66vUU8';  
 $search_engine_id = '65a27083bf3aa48dd'; 
 
 ?>

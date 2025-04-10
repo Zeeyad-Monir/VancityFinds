@@ -31,7 +31,7 @@ function get_current_user_display_name() {
 }
 
 // Google Custom Search API Integration for park images
-$google_api_key = 'AIzaSyBaGXSgmFYdoYL4WVuNuhzLAqDPV8m3OA8';  
+$google_api_key = 'AIzaSyDYxCXgYM35xLL51wrmHzbGWraAq66vUU8';  
 $search_engine_id = '65a27083bf3aa48dd'; 
 
 // Establish connection to the database
