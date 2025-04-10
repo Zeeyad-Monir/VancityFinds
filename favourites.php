@@ -128,7 +128,7 @@ $search_engine_id = '65a27083bf3aa48dd';
             color: inherit;
         }
         
-        /* Park image styling - FIXED */
+        /* Park image styling */
         .park-image {
             width: 100%;
             height: 200px;
