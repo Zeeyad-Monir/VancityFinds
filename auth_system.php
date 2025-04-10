@@ -1,6 +1,5 @@
 <?php
-// Simplified authentication system for Vancity Finds
-// This version removes the need for multiple authentication files
+
 
 // Include database credentials
 require_once("db_credentials.php");
