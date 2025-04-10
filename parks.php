@@ -825,6 +825,29 @@ $search_engine_id = '65a27083bf3aa48dd';
                 loadParks();
             });
         });
+
+         // Handle logout button
+document.addEventListener('DOMContentLoaded', () => {
+  const logoutBtn = document.querySelector('.logout-btn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      try {
+        const response = await fetch('auth_system.php?action=logout');
+        const data = await response.json();
+        
+        if (data.success) {
+          window.location.href = 'index.php?auth=logout';
+        } else {
+          toast.error(data.message || 'Logout failed');
+        }
+      } catch (error) {
+        toast.error('An error occurred during logout');
+        console.error('Logout error:', error);
+      }
+    });
+  }
+});
     </script>
 </body>
 </html>

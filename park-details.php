@@ -95,8 +95,8 @@ if (isset($images['items'][0]['link'])) {
     $image_url = './photos/default-image.jpg';  // Fallback to default image if none found
 }
 
-// Get map coordinates from GoogleMapDest
-$map_coordinates = $park['GoogleMapDest'] ?? '49.2827, -123.1207'; // Default to Vancouver downtown if not found
+// Get map coordinates t
+$map_coordinates = $park['GoogleMapDest'] ?? '49.2827, -123.1207'; // Default to Vancouver downtown if nothing found
 $coordinates = explode(',', $map_coordinates);
 $latitude = trim($coordinates[0]);
 $longitude = trim($coordinates[1]);
@@ -117,7 +117,7 @@ $longitude = trim($coordinates[1]);
         :root {
             --primary-color: #2c5282;
             --secondary-color: #2c5282;
-            --accent-color: #2c5282;
+            --accent-color: #e53e3e; 
             --light-bg: #f8fafc;
             --dark-bg: #1e293b;
             --text-dark: #1e293b;
@@ -562,12 +562,14 @@ $longitude = trim($coordinates[1]);
             border-radius: var(--border-radius);
             overflow: hidden;
             box-shadow: var(--box-shadow);
+           
         }
         
         #park-map {
             width: 100%;
             height: 350px;
             border-radius: var(--border-radius);
+            z-index: 0;
         }
         
         .map-section {
@@ -918,7 +920,7 @@ $longitude = trim($coordinates[1]);
     </style>
 </head>
 <body>
-    <!-- Header with Navigation from index.php -->
+    <!-- Header -->
     <header>
         <div class="container header-container">
             <a href="index.php" class="logo">Vancity Finds</a>
@@ -1181,19 +1183,19 @@ $longitude = trim($coordinates[1]);
             const lat = <?= $latitude ?>;
             const lng = <?= $longitude ?>;
             
-            // Create map centered at park location
+            // Creating map centered at park location
             const map = L.map('park-map').setView([lat, lng], 15);
             
-            // Add OpenStreetMap tile layer
+            // Adding OpenStreetMap tile layer
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
                 maxZoom: 19
             }).addTo(map);
             
-            // Add marker for park location
+            // Adding marker for park location
             const marker = L.marker([lat, lng]).addTo(map);
             
-            // Add popup with park details
+            // Adding popup with park details
             marker.bindPopup(`
                 <div style="padding: 10px; max-width: 300px;">
                     <h3 style="margin-top: 0; color: #2563eb; font-size: 16px;"><?= htmlspecialchars($park['Name']) ?></h3>
@@ -1559,6 +1561,29 @@ $longitude = trim($coordinates[1]);
         document.addEventListener('DOMContentLoaded', () => {
             loadReviews();
         });
+
+        // Handle logout button
+document.addEventListener('DOMContentLoaded', () => {
+  const logoutBtn = document.querySelector('.logout-btn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      try {
+        const response = await fetch('auth_system.php?action=logout');
+        const data = await response.json();
+        
+        if (data.success) {
+          window.location.href = 'index.php?auth=logout';
+        } else {
+          toast.error(data.message || 'Logout failed');
+        }
+      } catch (error) {
+        toast.error('An error occurred during logout');
+        console.error('Logout error:', error);
+      }
+    });
+  }
+});
     </script>
 </body>
 </html>
