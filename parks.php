@@ -588,15 +588,15 @@ $search_engine_id = '65a27083bf3aa48dd';
             }
 
             show({ title = 'Success!', message = '', type = 'success', duration = 5000 }) {
-                // Create toast element
+                // Creating toast element
                 const toast = document.createElement('div');
                 toast.className = `toast toast-${type}`;
                 
-                // Create progress bar for auto-dismiss
+                // Creating progress bar for auto-dismiss
                 const progressBar = document.createElement('div');
                 progressBar.className = 'toast-progress';
                 
-                // Add content to toast
+                // Adding content to toast
                 toast.innerHTML = `
                     <div class="toast-icon">
                         ${type === 'success' ? 
@@ -616,10 +616,10 @@ $search_engine_id = '65a27083bf3aa48dd';
                     </button>
                 `;
                 
-                // Add progress bar for auto-dismiss
+                // Adding progress bar for auto-dismiss
                 toast.appendChild(progressBar);
                 
-                // Add to container
+                // Adding to container
                 this.container.appendChild(toast);
                 
                 // Close button functionality
