@@ -18,7 +18,7 @@
     }
     body {
       font-family: 'Open Sans', sans-serif;
-      background: #f8ede9; /* Light pastel background to match the skeleton illustration vibe */
+      background: #f8ede9; 
       display: flex;
       min-height: 100vh;
       align-items: center;
@@ -33,6 +33,7 @@
       overflow: hidden;
       background: #fff;
     }
+
     /* Left Side: Illustration */
 .auth-illustration {
   flex: 1;
@@ -64,7 +65,7 @@
     }
     /* Google Button */
     .google-btn {
-      display: none; /* Hide Google button as we're removing Firebase */
+      display: none; 
     }
     .form-group {
       margin-bottom: 1rem;
@@ -93,7 +94,7 @@
     }
     .submit-btn {
       width: 100%;
-      background: #7a3e3e; /* Deep maroon-like color for the button */
+      background: #7a3e3e; 
       color: #fff;
       border: none;
       border-radius: 4px;
@@ -173,7 +174,7 @@
     /* Media queries */
     @media (min-width: 900px) {
       .auth-illustration {
-        display: block; /* Show illustration on larger screens */
+        display: block; 
       }
     }
     
