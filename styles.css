@@ -138,9 +138,9 @@ button:hover, .btn:hover {
 
 /* Enhanced Section Spacing */
 section {
-  padding: calc(var(--spacing-lg) * 1.5) 0; /* Increased from var(--spacing-lg) */
-  margin: 0; /* Remove margins between sections */
-  background-color: white; /* Ensure all sections have white background */
+  padding: calc(var(--spacing-lg) * 1.5) 0; 
+  margin: 0; 
+  background-color: white; 
 }
 
 /* Updated Header Styles */
@@ -349,7 +349,7 @@ header.scrolled {
   justify-content: center;
   text-align: center;
   margin-top: 60px; 
-  margin-bottom: 0; /* Removed extra space after hero section */
+  margin-bottom: 0; 
   overflow: hidden;
 }
 
@@ -379,9 +379,7 @@ header.scrolled {
 .hero-content {
   position: relative;
   z-index: 2;
-  /* Keep the text white for a clean look */
   color: #fff;
-  /* Add a text shadow to help text stand out */
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
   max-width: 700px; 
   padding: 0 1rem;   
@@ -553,7 +551,7 @@ header.scrolled {
 .filters-section {
   background-color: #f7fafc;
   padding: var(--spacing-lg) 0;
-  margin-bottom: var(--spacing-lg); /* Space between the filter and grid */
+  margin-bottom: var(--spacing-lg); 
 }
 
 .filters-section .container {
@@ -566,7 +564,7 @@ header.scrolled {
 
 .filter-group {
   flex: 1;
-  min-width: 200px;  /* Ensure minimum width for filters */
+  min-width: 200px;  
   margin-bottom: var(--spacing-sm);
 }
 
@@ -618,8 +616,8 @@ button[type="submit"]:hover {
 .filters-section {
   background-color: #f7fafc;
   padding: var(--spacing-lg) 0;
-  margin-top: calc(var(--spacing-lg) + 60px);  /* Ensure it is not covered by the navbar */
-  margin-bottom: var(--spacing-lg); /* Space between the filter and grid */
+  margin-top: calc(var(--spacing-lg) + 60px);  
+  margin-bottom: var(--spacing-lg); 
 }
 
 .filters-section .container {
@@ -634,7 +632,7 @@ button[type="submit"]:hover {
 .filter-group {
   flex: 1;
   min-width: 200px;
-  max-width: 300px;  /* Limit maximum width to prevent excessive stretching */
+  max-width: 300px; 
   margin-bottom: var(--spacing-sm);
 }
 
@@ -685,7 +683,7 @@ button[type="submit"]:hover {
 /* Parks Grid Section Styling */
 .parks-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Auto columns */
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
   gap: var(--spacing-md);
   padding: 0 var(--spacing-md);
 }
